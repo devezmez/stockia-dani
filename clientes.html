@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stockia — Clientes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- NAV -->
+  <header class="nav-header">
+    <a href="dashboard.html" class="nav-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" width="140" height="34">
+        <text x="0" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">St</text>
+        <g transform="translate(52, 6)"><rect x="0" y="11" width="24" height="17" rx="2.5" fill="#10B981"/><path d="M0 11 L4.5 4 L19.5 4 L24 11 Z" fill="#059669"/><line x1="0" y1="11" x2="24" y2="11" stroke="white" stroke-width="1.2" stroke-opacity="0.4"/><line x1="12" y1="11" x2="12" y2="28" stroke="white" stroke-width="1" stroke-opacity="0.3"/></g>
+        <text x="80" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">ckia</text>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html" class="nav-link"><span class="icono">🏠</span> Inicio</a></li>
+      <li><a href="productos.html" class="nav-link"><span class="icono">📦</span> Productos</a></li>
+      <li><a href="clientes.html" class="nav-link"><span class="icono">👥</span> Clientes</a></li>
+      <li><a href="ventas.html" class="nav-link"><span class="icono">💰</span> Ventas</a></li>
+      <li><a href="admin.html" class="nav-link" id="navAdmin" style="display:none"><span class="icono">⚙️</span> Admin</a></li>
+    </ul>
+    <div class="nav-usuario">
+      <div class="nav-usuario-info">
+        <div class="nav-usuario-nombre" id="navNombre">-</div>
+        <div class="nav-usuario-rol" id="navRol">-</div>
+      </div>
+      <button class="btn-salir" onclick="cerrarSesion()">🚪 Salir</button>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-titulo">👥 Clientes</h1>
+        <p class="page-subtitulo">Gestioná tu cartera de clientes</p>
+      </div>
+      <button class="btn btn-acento btn-lg" onclick="abrirNuevoCliente()">➕ Nuevo Cliente</button>
+    </div>
+
+    <!-- Buscador -->
+    <div class="card mb-24">
+      <div class="buscador-contenedor" style="margin-bottom:0">
+        <span class="buscador-icono">🔍</span>
+        <input type="text" class="buscador-input" id="buscarCliente" placeholder="Buscar por nombre o DNI...">
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+      <div class="tabla-contenedor">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>DNI</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Deuda activa</th>
+              <th>Registrado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaClientes">
+            <tr><td colspan="7"><div class="cargando"><div class="spinner"></div><span>Cargando clientes...</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: Nuevo / Editar Cliente -->
+<div class="modal-overlay" id="modalCliente">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-titulo" id="modalClienteTitulo">👥 Nuevo Cliente</h2>
+      <button class="modal-cerrar" onclick="cerrarModal('modalCliente')">✕</button>
+    </div>
+
+    <div class="form-grupo">
+      <label class="form-label">Nombre completo *</label>
+      <input type="text" id="cliNombre" class="form-input" placeholder="Ej: María González">
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">DNI *</label>
+      <input type="text" id="cliDni" class="form-input" placeholder="Ej: 30123456">
+    </div>
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label class="form-label">Teléfono</label>
+        <input type="tel" id="cliTelefono" class="form-input" placeholder="Ej: 1145678901">
+      </div>
+      <div class="form-grupo" style="grid-column: 1 / -1">
+        <label class="form-label">Dirección</label>
+        <input type="text" id="cliDireccion" class="form-input" placeholder="Ej: Av. San Martín 1234, Lomas de Zamora">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalCliente')">Cancelar</button>
+      <button class="btn btn-primario" id="btnGuardarCliente" onclick="guardarCliente()">💾 Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Detalle de cliente -->
+<div class="modal-overlay" id="modalDetalleCliente">
+  <div class="modal" style="max-width:750px">
+    <div class="modal-header">
+      <h2 class="modal-titulo" id="detalleClienteTitulo">👤 Detalle del Cliente</h2>
+      <button class="modal-cerrar" onclick="cerrarModal('modalDetalleCliente')">✕</button>
+    </div>
+    <div id="detalleClienteContenido"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/global.js"></script>
+<script>
+  let perfilActual = null;
+  let clienteActual = null;
+  let modoEdicion = false;
+  let todosClientes = [];
+
+  async function init() {
+    const resultado = await verificarSesion();
+    if (!resultado) return;
+    perfilActual = resultado.perfil;
+
+    document.getElementById('navNombre').textContent = perfilActual.nombre;
+    document.getElementById('navRol').textContent = perfilActual.rol === 'admin' ? '⭐ Administrador' : '👤 Operador';
+    if (perfilActual.rol === 'admin') document.getElementById('navAdmin').style.display = 'flex';
+    marcarNavActivo();
+
+    await cargarClientes();
+
+    let timer;
+    document.getElementById('buscarCliente').addEventListener('input', (e) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => cargarClientes(e.target.value.trim()), 350);
+    });
+  }
+
+  async function cargarClientes(query = '') {
+    const tbody = document.getElementById('tablaClientes');
+    tbody.innerHTML = '<tr><td colspan="7"><div class="cargando"><div class="spinner"></div></div></td></tr>';
+
+    let q = sb.from('clientes').select('*').eq('activo', true).order('nombre');
+    if (query) q = q.or(`nombre.ilike.%${query}%,dni.ilike.%${query}%`);
+
+    const { data, error } = await q;
+
+    if (error || !data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7">
+        <div class="estado-vacio">
+          <div class="estado-vacio-icono">👥</div>
+          <div class="estado-vacio-titulo">${query ? 'Sin resultados' : 'Sin clientes registrados'}</div>
+          <div class="estado-vacio-desc">${query ? 'Probá con otro nombre o DNI.' : 'Agregá tu primer cliente.'}</div>
+          ${!query ? '<button class="btn btn-acento" onclick="abrirNuevoCliente()">➕ Nuevo Cliente</button>' : ''}
+        </div>
+      </td></tr>`;
+      return;
+    }
+
+    todosClientes = data;
+
+    // Obtener deudas por cliente
+    const { data: deudas } = await sb.from('venta_items')
+      .select('deuda_restante, ventas(cliente_id)')
+      .eq('estado', 'activo');
+
+    const deudaPorCliente = {};
+    deudas?.forEach(d => {
+      const cid = d.ventas?.cliente_id;
+      if (cid) deudaPorCliente[cid] = (deudaPorCliente[cid] || 0) + Number(d.deuda_restante || 0);
+    });
+
+    tbody.innerHTML = data.map(c => {
+      const deuda = deudaPorCliente[c.id] || 0;
+      return `
+        <tr>
+          <td>
+            <div class="fw-600" style="font-size:16px">${c.nombre}</div>
+          </td>
+          <td class="fw-600">${c.dni}</td>
+          <td>${c.telefono ? `<a href="tel:${c.telefono}" style="color:var(--secundario)">${c.telefono}</a>` : '-'}</td>
+          <td class="texto-suave">${c.direccion || '-'}</td>
+          <td class="${deuda > 0 ? 'texto-rojo fw-600' : 'texto-suave'}">${deuda > 0 ? formatoPeso(deuda) : '—'}</td>
+          <td class="texto-suave">${formatoFecha(c.created_at)}</td>
+          <td>
+            <div class="tabla-acciones">
+              <button class="btn btn-ghost btn-sm" onclick="verDetalleCliente('${c.id}')" title="Ver detalle">👁️</button>
+              <button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id}')" title="Editar">✏️</button>
+              ${perfilActual?.rol === 'admin' ? `<button class="btn btn-peligro btn-sm" onclick="eliminarCliente('${c.id}', '${c.nombre.replace(/'/g, "\\'")}')" title="Eliminar">🗑️</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function abrirNuevoCliente() {
+    clienteActual = null;
+    modoEdicion = false;
+    document.getElementById('modalClienteTitulo').textContent = '👥 Nuevo Cliente';
+    document.getElementById('cliNombre').value = '';
+    document.getElementById('cliDni').value = '';
+    document.getElementById('cliTelefono').value = '';
+    document.getElementById('cliDireccion').value = '';
+    abrirModal('modalCliente');
+  }
+
+  function editarCliente(id) {
+    clienteActual = todosClientes.find(c => c.id === id);
+    if (!clienteActual) return;
+    modoEdicion = true;
+    document.getElementById('modalClienteTitulo').textContent = '✏️ Editar Cliente';
+    document.getElementById('cliNombre').value = clienteActual.nombre;
+    document.getElementById('cliDni').value = clienteActual.dni;
+    document.getElementById('cliTelefono').value = clienteActual.telefono || '';
+    document.getElementById('cliDireccion').value = clienteActual.direccion || '';
+    abrirModal('modalCliente');
+  }
+
+  async function guardarCliente() {
+    const nombre = document.getElementById('cliNombre').value.trim();
+    const dni = document.getElementById('cliDni').value.trim();
+    const telefono = document.getElementById('cliTelefono').value.trim();
+    const direccion = document.getElementById('cliDireccion').value.trim();
+
+    if (!nombre) { mostrarAlerta('El nombre es obligatorio.', 'error'); return; }
+    if (!dni) { mostrarAlerta('El DNI es obligatorio.', 'error'); return; }
+
+    const btn = document.getElementById('btnGuardarCliente');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+      if (modoEdicion && clienteActual) {
+        const { error } = await sb.from('clientes').update({ nombre, dni, telefono, direccion }).eq('id', clienteActual.id);
+        if (error) throw error;
+        mostrarAlerta('Cliente actualizado.', 'exito');
+      } else {
+        const { error } = await sb.from('clientes').insert({ nombre, dni, telefono, direccion });
+        if (error) {
+          if (error.code === '23505') { mostrarAlerta('Ya existe un cliente con ese DNI.', 'error'); return; }
+          throw error;
+        }
+        mostrarAlerta('Cliente creado correctamente.', 'exito');
+      }
+      cerrarModal('modalCliente');
+      await cargarClientes(document.getElementById('buscarCliente').value.trim());
+    } catch (err) {
+      mostrarAlerta('Error al guardar el cliente.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar Cliente';
+    }
+  }
+
+  async function eliminarCliente(id, nombre) {
+    if (!confirm(`¿Desactivar al cliente "${nombre}"?`)) return;
+    const { error } = await sb.from('clientes').update({ activo: false }).eq('id', id);
+    if (error) { mostrarAlerta('Error al eliminar.', 'error'); return; }
+    mostrarAlerta('Cliente eliminado.', 'exito');
+    await cargarClientes(document.getElementById('buscarCliente').value.trim());
+  }
+
+  async function verDetalleCliente(id) {
+    const cliente = todosClientes.find(c => c.id === id);
+    if (!cliente) return;
+
+    document.getElementById('detalleClienteTitulo').textContent = `👤 ${cliente.nombre}`;
+    const contenido = document.getElementById('detalleClienteContenido');
+    contenido.innerHTML = '<div class="cargando"><div class="spinner"></div></div>';
+    abrirModal('modalDetalleCliente');
+
+    // Obtener ventas del cliente
+    const { data: ventaItems } = await sb
+      .from('venta_items')
+      .select(`
+        id, forma_pago, cantidad_cuotas, valor_cuota, total_item, deuda_restante, estado, proxima_fecha_pago, created_at,
+        productos(nombre),
+        ventas!inner(cliente_id)
+      `)
+      .eq('ventas.cliente_id', id)
+      .order('created_at', { ascending: false });
+
+    const formaPagoLabel = { contado: '💵 Contado', semanal: '📅 Semanal', quincenal: '📆 Quincenal', mensual: '🗓️ Mensual' };
+    const estadoBadge = {
+      activo: '<span class="badge badge-naranja">● Activo</span>',
+      pagado: '<span class="badge badge-verde">✓ Pagado</span>',
+      cancelado: '<span class="badge badge-gris">✗ Cancelado</span>'
+    };
+
+    const deudaTotal = ventaItems?.filter(v => v.estado === 'activo').reduce((a, v) => a + Number(v.deuda_restante || 0), 0) || 0;
+
+    contenido.innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px">
+        <div style="padding:16px;background:var(--fondo);border-radius:var(--radio-sm)">
+          <div class="texto-suave" style="font-size:13px">DNI</div>
+          <div class="fw-600" style="font-size:16px">${cliente.dni}</div>
+        </div>
+        <div style="padding:16px;background:var(--fondo);border-radius:var(--radio-sm)">
+          <div class="texto-suave" style="font-size:13px">Teléfono</div>
+          <div class="fw-600" style="font-size:16px">${cliente.telefono || '-'}</div>
+        </div>
+        <div style="padding:16px;background:var(--fondo);border-radius:var(--radio-sm);grid-column:1/-1">
+          <div class="texto-suave" style="font-size:13px">Dirección</div>
+          <div class="fw-600" style="font-size:16px">${cliente.direccion || '-'}</div>
+        </div>
+      </div>
+
+      ${deudaTotal > 0 ? `
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radio-sm);padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:16px;color:#DC2626;font-weight:600">💳 Deuda total pendiente</span>
+          <span style="font-size:24px;font-weight:800;color:#DC2626">${formatoPeso(deudaTotal)}</span>
+        </div>
+      ` : `
+        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--radio-sm);padding:16px;margin-bottom:20px;text-align:center">
+          <span style="color:#059669;font-weight:600">✓ Sin deuda pendiente</span>
+        </div>
+      `}
+
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">📋 Historial de compras</h3>
+      ${!ventaItems || ventaItems.length === 0 ? `
+        <p class="texto-suave texto-centro" style="padding:20px">Sin compras registradas.</p>
+      ` : `
+        <div class="tabla-contenedor">
+          <table class="tabla">
+            <thead><tr><th>Producto</th><th>Pago</th><th>Total</th><th>Deuda</th><th>Estado</th></tr></thead>
+            <tbody>
+              ${ventaItems.map(v => `
+                <tr>
+                  <td class="fw-600">${v.productos?.nombre || '-'}</td>
+                  <td>${formaPagoLabel[v.forma_pago] || v.forma_pago}${v.cantidad_cuotas > 1 ? ` (${v.cantidad_cuotas} cuotas de ${formatoPeso(v.valor_cuota)})` : ''}</td>
+                  <td>${formatoPeso(v.total_item)}</td>
+                  <td class="${Number(v.deuda_restante) > 0 ? 'texto-rojo fw-600' : 'texto-suave'}">${formatoPeso(v.deuda_restante)}</td>
+                  <td>${estadoBadge[v.estado] || v.estado}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    `;
+  }
+
+  init();
+</script>
+</body>
+</html>

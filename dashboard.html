@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stockia — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- NAV -->
+    <header class="nav-header">
+      <a href="dashboard.html" class="nav-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" width="140" height="34">
+          <text x="0" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">St</text>
+          <g transform="translate(52, 6)">
+            <rect x="0" y="11" width="24" height="17" rx="2.5" fill="#10B981"/>
+            <path d="M0 11 L4.5 4 L19.5 4 L24 11 Z" fill="#059669"/>
+            <line x1="0" y1="11" x2="24" y2="11" stroke="white" stroke-width="1.2" stroke-opacity="0.4"/>
+            <line x1="12" y1="11" x2="12" y2="28" stroke="white" stroke-width="1" stroke-opacity="0.3"/>
+          </g>
+          <text x="80" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">ckia</text>
+        </svg>
+      </a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html" class="nav-link"><span class="icono">🏠</span> Inicio</a></li>
+        <li><a href="productos.html" class="nav-link"><span class="icono">📦</span> Productos</a></li>
+        <li><a href="clientes.html" class="nav-link"><span class="icono">👥</span> Clientes</a></li>
+        <li><a href="ventas.html" class="nav-link"><span class="icono">💰</span> Ventas</a></li>
+        <li><a href="admin.html" class="nav-link" id="navAdmin" style="display:none"><span class="icono">⚙️</span> Admin</a></li>
+      </ul>
+      <div class="nav-usuario">
+        <div class="nav-usuario-info">
+          <div class="nav-usuario-nombre" id="navNombre">-</div>
+          <div class="nav-usuario-rol" id="navRol">-</div>
+        </div>
+        <button class="btn-salir" onclick="cerrarSesion()">🚪 Salir</button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="main-content">
+
+      <!-- Bienvenida -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-titulo">🏠 Panel Principal</h1>
+          <p class="page-subtitulo" id="fechaHoy"></p>
+        </div>
+        <a href="ventas.html" class="btn btn-acento btn-lg">
+          ➕ Nueva Venta
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-icono azul">📦</div>
+          <div class="stat-info">
+            <div class="stat-valor" id="totalProductos">—</div>
+            <div class="stat-label">Productos registrados</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icono verde">🔢</div>
+          <div class="stat-info">
+            <div class="stat-valor" id="stockTotal">—</div>
+            <div class="stat-label">Unidades en stock</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icono naranja">💰</div>
+          <div class="stat-info">
+            <div class="stat-valor" id="ventasActivas">—</div>
+            <div class="stat-label">Ventas activas</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icono rojo">💳</div>
+          <div class="stat-info">
+            <div class="stat-valor" id="deudaTotal">—</div>
+            <div class="stat-label">Deuda total a cobrar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buscadores rápidos -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;" id="buscadoresGrid">
+        <!-- Buscar producto -->
+        <div class="card">
+          <div class="card-titulo"><span class="icono">📦</span> Buscar producto</div>
+          <div class="buscador-contenedor" style="margin-bottom:0">
+            <span class="buscador-icono">🔍</span>
+            <input type="text" class="buscador-input" id="buscarProducto" placeholder="Nombre del producto...">
+          </div>
+          <div id="resultadosProducto" style="margin-top:12px"></div>
+        </div>
+
+        <!-- Buscar cliente -->
+        <div class="card">
+          <div class="card-titulo"><span class="icono">👥</span> Buscar cliente</div>
+          <div class="buscador-contenedor" style="margin-bottom:0">
+            <span class="buscador-icono">🔍</span>
+            <input type="text" class="buscador-input" id="buscarCliente" placeholder="Nombre o DNI...">
+          </div>
+          <div id="resultadosCliente" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <!-- Últimas ventas -->
+      <div class="card">
+        <div class="card-titulo"><span class="icono">📋</span> Últimas ventas</div>
+        <div class="tabla-contenedor">
+          <table class="tabla" id="tablaUltimasVentas">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Producto</th>
+                <th>Forma pago</th>
+                <th>Total</th>
+                <th>Deuda</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoUltimasVentas">
+              <tr><td colspan="7"><div class="cargando"><div class="spinner"></div><span>Cargando ventas...</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px; text-align:right">
+          <a href="ventas.html" class="btn btn-ghost btn-sm">Ver todas las ventas →</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/global.js"></script>
+  <script>
+    let perfilActual = null;
+
+    async function init() {
+      const resultado = await verificarSesion();
+      if (!resultado) return;
+      perfilActual = resultado.perfil;
+
+      // Nav
+      document.getElementById('navNombre').textContent = perfilActual.nombre;
+      document.getElementById('navRol').textContent = perfilActual.rol === 'admin' ? '⭐ Administrador' : '👤 Operador';
+      marcarNavActivo();
+
+      if (perfilActual.rol === 'admin') {
+        document.getElementById('navAdmin').style.display = 'flex';
+      }
+
+      // Fecha
+      document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-AR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      cargarEstadisticas();
+      cargarUltimasVentas();
+      configurarBuscadores();
+    }
+
+    async function cargarEstadisticas() {
+      try {
+        // Productos activos
+        const { count: totalProd } = await sb.from('productos').select('*', { count: 'exact', head: true }).eq('activo', true);
+        document.getElementById('totalProductos').textContent = totalProd ?? 0;
+
+        // Stock total
+        const { data: stocks } = await sb.from('productos').select('stock').eq('activo', true);
+        const stockSum = stocks?.reduce((a, p) => a + (p.stock || 0), 0) ?? 0;
+        document.getElementById('stockTotal').textContent = stockSum.toLocaleString('es-AR');
+
+        // Ventas activas (items)
+        const { count: ventasAct } = await sb.from('venta_items').select('*', { count: 'exact', head: true }).eq('estado', 'activo');
+        document.getElementById('ventasActivas').textContent = ventasAct ?? 0;
+
+        // Deuda total
+        const { data: deudas } = await sb.from('venta_items').select('deuda_restante').eq('estado', 'activo');
+        const deudaSum = deudas?.reduce((a, d) => a + Number(d.deuda_restante || 0), 0) ?? 0;
+        document.getElementById('deudaTotal').textContent = formatoPeso(deudaSum);
+
+      } catch (err) {
+        console.error('Error cargando estadísticas:', err);
+      }
+    }
+
+    async function cargarUltimasVentas() {
+      try {
+        const { data, error } = await sb
+          .from('venta_items')
+          .select(`
+            id, forma_pago, total_item, deuda_restante, estado, created_at,
+            productos(nombre),
+            ventas(
+              clientes(nombre)
+            )
+          `)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        const tbody = document.getElementById('cuerpoUltimasVentas');
+
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7">
+            <div class="estado-vacio">
+              <div class="estado-vacio-icono">💰</div>
+              <div class="estado-vacio-titulo">Sin ventas todavía</div>
+              <div class="estado-vacio-desc">Registrá tu primera venta.</div>
+            </div>
+          </td></tr>`;
+          return;
+        }
+
+        const formaPagoLabel = { contado: '💵 Contado', semanal: '📅 Semanal', quincenal: '📆 Quincenal', mensual: '🗓️ Mensual' };
+        const estadoBadge = {
+          activo: '<span class="badge badge-naranja">● Activo</span>',
+          pagado: '<span class="badge badge-verde">✓ Pagado</span>',
+          cancelado: '<span class="badge badge-rojo">✗ Cancelado</span>'
+        };
+
+        tbody.innerHTML = data.map(item => `
+          <tr>
+            <td>${formatoFecha(item.created_at)}</td>
+            <td class="fw-600">${item.ventas?.clientes?.nombre || '-'}</td>
+            <td>${item.productos?.nombre || '-'}</td>
+            <td>${formaPagoLabel[item.forma_pago] || item.forma_pago}</td>
+            <td class="fw-600">${formatoPeso(item.total_item)}</td>
+            <td class="${Number(item.deuda_restante) > 0 ? 'texto-rojo fw-600' : 'texto-verde'}">${formatoPeso(item.deuda_restante)}</td>
+            <td>${estadoBadge[item.estado] || item.estado}</td>
+          </tr>
+        `).join('');
+
+      } catch (err) {
+        document.getElementById('cuerpoUltimasVentas').innerHTML =
+          '<tr><td colspan="7" class="texto-centro texto-suave">Error cargando ventas.</td></tr>';
+      }
+    }
+
+    function configurarBuscadores() {
+      let timerProd, timerCli;
+
+      document.getElementById('buscarProducto').addEventListener('input', (e) => {
+        clearTimeout(timerProd);
+        timerProd = setTimeout(() => buscarProducto(e.target.value.trim()), 350);
+      });
+
+      document.getElementById('buscarCliente').addEventListener('input', (e) => {
+        clearTimeout(timerCli);
+        timerCli = setTimeout(() => buscarCliente(e.target.value.trim()), 350);
+      });
+    }
+
+    async function buscarProducto(query) {
+      const container = document.getElementById('resultadosProducto');
+      if (!query) { container.innerHTML = ''; return; }
+
+      const { data } = await sb.from('productos').select('nombre, precio, stock').ilike('nombre', `%${query}%`).eq('activo', true).limit(5);
+
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="texto-suave" style="font-size:14px">Sin resultados.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(p => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde)">
+          <div>
+            <div class="fw-600" style="font-size:15px">${p.nombre}</div>
+            <div class="texto-suave" style="font-size:13px">Stock: ${p.stock} unidades</div>
+          </div>
+          <div class="fw-700" style="color:var(--primario)">${formatoPeso(p.precio)}</div>
+        </div>
+      `).join('');
+    }
+
+    async function buscarCliente(query) {
+      const container = document.getElementById('resultadosCliente');
+      if (!query) { container.innerHTML = ''; return; }
+
+      const { data } = await sb.from('clientes')
+        .select('nombre, dni, telefono')
+        .or(`nombre.ilike.%${query}%,dni.ilike.%${query}%`)
+        .eq('activo', true)
+        .limit(5);
+
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="texto-suave" style="font-size:14px">Sin resultados.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(c => `
+        <div style="padding:10px 0;border-bottom:1px solid var(--borde)">
+          <div class="fw-600" style="font-size:15px">${c.nombre}</div>
+          <div class="texto-suave" style="font-size:13px">DNI: ${c.dni} · Tel: ${c.telefono || '-'}</div>
+        </div>
+      `).join('');
+    }
+
+    init();
+
+    // Responsive: ocultar buscadores en móvil
+    if (window.innerWidth < 640) {
+      document.getElementById('buscadoresGrid').style.gridTemplateColumns = '1fr';
+    }
+  </script>
+</body>
+</html>
