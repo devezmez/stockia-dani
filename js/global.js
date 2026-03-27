@@ -3,8 +3,8 @@
 // ============================================================
 
 // ⚠️ REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES DE SUPABASE
-const SUPABASE_URL = 'https://paqaucefeyrxcyehrreo.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhcWF1Y2VmZXlyeGN5ZWhycmVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzI5OTUsImV4cCI6MjA5MDE0ODk5NX0.AhX_emKBhnBabdRBP4Rn0g4ubxYl3pxuk9Rf-tiM03g';
+const SUPABASE_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrd3RzcGdicHFqd3Z5YWx3eW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3MTgsImV4cCI6MjA5MDE5NDcxOH0.b0BOSZApkFBiNVHrusCltKJtx_lGCf9cRncxUn8jr7U';
 
 // Inicializar cliente Supabase
 const { createClient } = supabase;
