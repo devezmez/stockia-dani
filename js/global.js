@@ -2,8 +2,8 @@
 // STOCKIA - Configuración global y utilidades
 // ============================================================
 
-// ⚠️ REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES DE SUPABASE
-const SUPABASE_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co'; 
+// ⚠️ CREDENCIALES DE SUPABASE
+const SUPABASE_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrd3RzcGdicHFqd3Z5YWx3eW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3MTgsImV4cCI6MjA5MDE5NDcxOH0.b0BOSZApkFBiNVHrusCltKJtx_lGCf9cRncxUn8jr7U';
 
 // Inicializar cliente Supabase
