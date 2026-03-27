@@ -139,8 +139,9 @@
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Producto</th>
+                <th>Vendedor</th>
                 <th>Forma pago</th>
-                <th>Cuotas</th>
+                <th>Cuotas / Vto.</th>
                 <th>Total</th>
                 <th>Deuda</th>
                 <th>Estado</th>
@@ -161,9 +162,18 @@
 
         <!-- Formulario -->
         <div>
+        <!-- Vendedor -->
+          <div class="card mb-24">
+            <div class="card-titulo">🧑‍💼 Paso 1: Vendedor</div>
+            <div class="form-grupo" style="margin-bottom:0">
+              <label class="form-label">Nombre del vendedor (opcional)</label>
+              <input type="text" id="vendedorNombre" class="form-input" placeholder="Ej: Juan Pérez">
+            </div>
+          </div>
+
           <!-- Cliente -->
           <div class="card mb-24">
-            <div class="card-titulo">👥 Paso 1: Seleccionar cliente</div>
+            <div class="card-titulo">👥 Paso 2: Seleccionar cliente</div>
             <div class="buscador-contenedor">
               <span class="buscador-icono">🔍</span>
               <input type="text" class="buscador-input" id="buscarClienteVenta" placeholder="Nombre o DNI del cliente...">
@@ -182,7 +192,7 @@
 
           <!-- Productos -->
           <div class="card mb-24">
-            <div class="card-titulo">📦 Paso 2: Agregar productos</div>
+            <div class="card-titulo">📦 Paso 3: Agregar productos</div>
             <div style="display:flex;gap:12px;margin-bottom:16px">
               <div style="flex:1;position:relative">
                 <span class="buscador-icono" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--texto-suave)">🔍</span>
@@ -298,15 +308,16 @@
 
   async function cargarVentas(query = '') {
     const tbody = document.getElementById('tablaVentas');
-    tbody.innerHTML = '<tr><td colspan="9"><div class="cargando"><div class="spinner"></div></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10"><div class="cargando"><div class="spinner"></div></div></td></tr>';
 
     const { data, error } = await sb
       .from('venta_items')
       .select(`
-        id, forma_pago, cantidad_cuotas, valor_cuota, total_item, deuda_restante, estado, proxima_fecha_pago, created_at,
-        porcentaje_recargo, precio_base_total,
+        id, forma_pago, cantidad_cuotas, valor_cuota, total_item, deuda_restante, estado,
+        proxima_fecha_pago, created_at, porcentaje_recargo, precio_base_total,
+        dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin,
         productos(nombre),
-        ventas(id, clientes(nombre))
+        ventas(id, vendedor, clientes(nombre))
       `)
       .in('estado', ['activo', 'pagado'])
       .order('created_at', { ascending: false })
@@ -322,7 +333,7 @@
     }
 
     if (error || filtrados.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9">
+      tbody.innerHTML = `<tr><td colspan="10">
         <div class="estado-vacio">
           <div class="estado-vacio-icono">💰</div>
           <div class="estado-vacio-titulo">${query ? 'Sin resultados' : 'Sin ventas registradas'}</div>
@@ -345,10 +356,13 @@
         <td class="texto-suave">${formatoFecha(v.created_at)}</td>
         <td class="fw-600">${v.ventas?.clientes?.nombre || '-'}</td>
         <td>${v.productos?.nombre || '-'}</td>
+        <td class="texto-suave">${v.ventas?.vendedor || '<span style="color:var(--borde)">—</span>'}</td>
         <td>${formaPagoLabel[v.forma_pago] || v.forma_pago}</td>
         <td class="texto-centro">
           ${v.cantidad_cuotas || 1}
           ${v.porcentaje_recargo > 0 ? `<br><span class="badge badge-naranja" style="font-size:11px">+${v.porcentaje_recargo}%</span>` : ''}
+          ${v.dia_vencimiento ? `<br><span class="texto-suave" style="font-size:12px">Vto. día ${v.dia_vencimiento}</span>` : ''}
+          ${v.porcentaje_mora > 0 ? `<br><span class="badge badge-rojo" style="font-size:11px">mora ${v.porcentaje_mora}%</span>` : ''}
         </td>
         <td class="fw-600">${formatoPeso(v.total_item)}</td>
         <td class="${Number(v.deuda_restante) > 0 ? 'texto-rojo fw-600' : 'texto-verde'}">${formatoPeso(v.deuda_restante)}</td>
@@ -466,7 +480,8 @@
     const id = ++contadorItems;
     itemsVenta.push({
       id, producto: prod, cantidad: 1,
-      forma_pago: 'contado', cuotas: 1, precio: prod.precio, recargo: 0
+      forma_pago: 'contado', cuotas: 1, precio: prod.precio, recargo: 0,
+      dia_vencimiento: null, porcentaje_mora: 0, porcentaje_gasto_admin: 0
     });
 
     document.getElementById('resultadosProductoVenta').innerHTML = '';
@@ -534,6 +549,42 @@
                   onchange="actualizarItem(${item.id}, 'recargo', this.value)">
               </div>
             </div>
+
+            <!-- Vencimiento y mora -->
+            <div style="margin-top:12px; padding:14px; background:white; border:1px solid var(--borde); border-radius:var(--radio-sm)">
+              <div style="font-size:13px;font-weight:700;color:var(--texto-suave);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">⚠️ Condiciones de mora</div>
+              <div class="form-fila" style="gap:12px;margin-bottom:10px">
+                <div>
+                  <label class="form-label" style="font-size:13px">📅 Día de vencimiento mensual</label>
+                  <input type="number" value="${item.dia_vencimiento || ''}" min="1" max="28"
+                    class="form-input" style="font-size:15px;padding:10px"
+                    placeholder="Ej: 15"
+                    onchange="actualizarItem(${item.id}, 'dia_vencimiento', this.value)">
+                  <div style="font-size:12px;color:var(--texto-suave);margin-top:4px">Dejar vacío si no hay fecha fija</div>
+                </div>
+                <div>
+                  <label class="form-label" style="font-size:13px">🔴 % Mora por pago tardío</label>
+                  <input type="number" value="${item.porcentaje_mora || 0}" min="0" max="100" step="0.5"
+                    class="form-input" style="font-size:15px;padding:10px"
+                    placeholder="0"
+                    onchange="actualizarItem(${item.id}, 'porcentaje_mora', this.value)">
+                </div>
+              </div>
+              <div>
+                <label class="form-label" style="font-size:13px">📋 % Gastos administrativos (por mora)</label>
+                <input type="number" value="${item.porcentaje_gasto_admin || 0}" min="0" max="100" step="0.5"
+                  class="form-input" style="font-size:15px;padding:10px"
+                  placeholder="0"
+                  onchange="actualizarItem(${item.id}, 'porcentaje_gasto_admin', this.value)">
+                <div style="font-size:12px;color:var(--texto-suave);margin-top:4px">Se suma a la mora solo cuando el pago es fuera de término</div>
+              </div>
+              ${(item.porcentaje_mora > 0 || item.porcentaje_gasto_admin > 0) ? `
+              <div style="margin-top:10px;padding:10px;background:#FFF7ED;border-radius:var(--radio-sm);font-size:13px;color:#92400E">
+                Si paga tarde: cuota ${formatoPeso(cuotaValor)} + mora ${item.porcentaje_mora||0}% + admin ${item.porcentaje_gasto_admin||0}%
+                = <strong>${formatoPeso(cuotaValor * (1 + ((item.porcentaje_mora||0) + (item.porcentaje_gasto_admin||0)) / 100))}</strong>
+              </div>` : ''}
+            </div>
+
             <div class="cuota-preview" style="margin-top:10px">
               <div style="display:flex;justify-content:space-between;margin-bottom:4px">
                 <span>Precio contado:</span>
@@ -550,6 +601,7 @@
               </div>
               <div style="font-size:15px;font-weight:700">
                 💡 ${item.cuotas} cuota${item.cuotas > 1 ? 's' : ''} de ${formatoPeso(cuotaValor)}
+                ${item.dia_vencimiento ? `· vence el día <strong>${item.dia_vencimiento}</strong> de cada mes` : ''}
               </div>
             </div>
           ` : `
@@ -567,9 +619,21 @@
     if (!item) return;
     if (campo === 'cantidad') item.cantidad = Math.max(1, parseInt(valor) || 1);
     else if (campo === 'precio') item.precio = Math.max(0, parseFloat(valor) || 0);
-    else if (campo === 'forma_pago') { item.forma_pago = valor; if (valor === 'contado') { item.cuotas = 1; item.recargo = 0; } }
+    else if (campo === 'forma_pago') {
+      item.forma_pago = valor;
+      if (valor === 'contado') {
+        item.cuotas = 1; item.recargo = 0;
+        item.dia_vencimiento = null; item.porcentaje_mora = 0; item.porcentaje_gasto_admin = 0;
+      }
+    }
     else if (campo === 'cuotas') item.cuotas = Math.max(1, parseInt(valor) || 1);
     else if (campo === 'recargo') item.recargo = Math.max(0, Math.min(200, parseFloat(valor) || 0));
+    else if (campo === 'dia_vencimiento') {
+      const d = parseInt(valor);
+      item.dia_vencimiento = (!valor || isNaN(d)) ? null : Math.max(1, Math.min(28, d));
+    }
+    else if (campo === 'porcentaje_mora') item.porcentaje_mora = Math.max(0, Math.min(100, parseFloat(valor) || 0));
+    else if (campo === 'porcentaje_gasto_admin') item.porcentaje_gasto_admin = Math.max(0, Math.min(100, parseFloat(valor) || 0));
     renderizarItems();
     actualizarResumen();
   }
@@ -639,27 +703,45 @@
 
     try {
       const usuario = (await sb.auth.getUser()).data.user;
+      const vendedor = document.getElementById('vendedorNombre').value.trim();
       const totalVenta = itemsVenta.reduce((a, i) => {
         const base = i.precio * i.cantidad;
         return a + base + (base * (i.recargo || 0) / 100);
       }, 0);
 
-      // Crear venta
+      // Crear venta (con vendedor)
       const { data: venta, error: errVenta } = await sb.from('ventas').insert({
         cliente_id: clienteVenta.id,
         usuario_id: usuario.id,
-        total_venta: totalVenta
+        total_venta: totalVenta,
+        vendedor: vendedor || null
       }).select().single();
 
       if (errVenta) throw errVenta;
 
-      // Calcular próximas fechas de pago
+      // Calcular próxima fecha de pago
+      // Si hay dia_vencimiento fijo, usar ese día en el próximo mes
+      // Si no, usar el intervalo normal desde hoy
       const hoy = new Date();
-      const proximaFecha = (tipo) => {
+
+      const proximaFechaConDia = (tipo, diaVto) => {
+        if (!diaVto) {
+          // Sin día fijo: calcular por intervalo
+          const d = new Date(hoy);
+          if (tipo === 'semanal') d.setDate(d.getDate() + 7);
+          else if (tipo === 'quincenal') d.setDate(d.getDate() + 15);
+          else if (tipo === 'mensual') d.setMonth(d.getMonth() + 1);
+          return d.toISOString().split('T')[0];
+        }
+        // Con día fijo: buscar el próximo mes que tenga ese día
         const d = new Date(hoy);
-        if (tipo === 'semanal') d.setDate(d.getDate() + 7);
-        else if (tipo === 'quincenal') d.setDate(d.getDate() + 15);
-        else if (tipo === 'mensual') d.setMonth(d.getMonth() + 1);
+        d.setDate(diaVto);
+        // Si ese día ya pasó este mes, avanzar al próximo mes
+        if (d <= hoy) {
+          if (tipo === 'semanal') d.setDate(d.getDate() + 7);
+          else if (tipo === 'quincenal') d.setDate(d.getDate() + 15);
+          else d.setMonth(d.getMonth() + 1);
+        }
         return d.toISOString().split('T')[0];
       };
 
@@ -681,9 +763,14 @@
           total_item: totalConRecargo,
           precio_base_total: totalBase,
           porcentaje_recargo: recargoPct,
+          dia_vencimiento: item.forma_pago !== 'contado' ? (item.dia_vencimiento || null) : null,
+          porcentaje_mora: item.forma_pago !== 'contado' ? (item.porcentaje_mora || 0) : 0,
+          porcentaje_gasto_admin: item.forma_pago !== 'contado' ? (item.porcentaje_gasto_admin || 0) : 0,
           deuda_restante: item.forma_pago === 'contado' ? 0 : totalConRecargo,
           estado: item.forma_pago === 'contado' ? 'pagado' : 'activo',
-          proxima_fecha_pago: item.forma_pago !== 'contado' ? proximaFecha(item.forma_pago) : null
+          proxima_fecha_pago: item.forma_pago !== 'contado'
+            ? proximaFechaConDia(item.forma_pago, item.dia_vencimiento)
+            : null
         };
       });
 
@@ -696,6 +783,7 @@
       clienteVenta = null;
       itemsVenta = [];
       contadorItems = 0;
+      document.getElementById('vendedorNombre').value = '';
       limpiarCliente();
       renderizarItems();
       actualizarResumen();
@@ -719,6 +807,7 @@
   async function abrirModalPago(ventaItemId) {
     const { data, error } = await sb.from('venta_items').select(`
       id, deuda_restante, valor_cuota, cantidad_cuotas, forma_pago,
+      dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin, proxima_fecha_pago,
       productos(nombre),
       ventas(clientes(nombre))
     `).eq('id', ventaItemId).single();
@@ -726,23 +815,74 @@
     if (error || !data) { mostrarAlerta('Error al cargar el ítem.', 'error'); return; }
 
     ventaItemActual = data;
-    document.getElementById('pagoMonto').value = data.valor_cuota || '';
+
+    // Detectar si hay mora
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const tieneFechaVto = data.dia_vencimiento && data.proxima_fecha_pago;
+    let hayMora = false;
+    let fechaVto = null;
+    let montoMora = 0;
+    let montoAdmin = 0;
+    let totalConMora = Number(data.valor_cuota);
+
+    if (tieneFechaVto) {
+      fechaVto = new Date(data.proxima_fecha_pago + 'T00:00:00');
+      hayMora = hoy > fechaVto;
+      if (hayMora) {
+        const pctMora = Number(data.porcentaje_mora || 0);
+        const pctAdmin = Number(data.porcentaje_gasto_admin || 0);
+        const cuota = Number(data.valor_cuota);
+        montoMora = cuota * pctMora / 100;
+        montoAdmin = cuota * pctAdmin / 100;
+        totalConMora = cuota + montoMora + montoAdmin;
+      }
+    }
+
+    // Pre-completar monto: si hay mora, el monto sugerido incluye recargos
+    document.getElementById('pagoMonto').value = hayMora ? totalConMora.toFixed(2) : (data.valor_cuota || '');
     document.getElementById('pagoNroCuota').value = '';
     document.getElementById('pagoNotas').value = '';
 
+    // Guardar en el objeto para usar al registrar
+    ventaItemActual._hayMora = hayMora;
+    ventaItemActual._montoMora = montoMora;
+    ventaItemActual._montoAdmin = montoAdmin;
+    ventaItemActual._fechaVto = fechaVto;
+
+    const alertaMora = hayMora ? `
+      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radio-sm);padding:12px 14px;margin-top:12px;font-size:14px">
+        <div style="font-weight:700;color:#DC2626;margin-bottom:6px">⚠️ Pago FUERA DE TÉRMINO — Se aplica mora</div>
+        <div style="color:#7F1D1D">
+          Vencimiento: <strong>${formatoFecha(data.proxima_fecha_pago)}</strong><br>
+          Cuota original: ${formatoPeso(data.valor_cuota)}<br>
+          Mora (${data.porcentaje_mora}%): <strong>+ ${formatoPeso(montoMora)}</strong><br>
+          Gastos admin (${data.porcentaje_gasto_admin}%): <strong>+ ${formatoPeso(montoAdmin)}</strong><br>
+          <span style="font-size:16px;font-weight:800">Total a cobrar: ${formatoPeso(totalConMora)}</span>
+        </div>
+      </div>` : (tieneFechaVto ? `
+      <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--radio-sm);padding:10px 14px;margin-top:12px;font-size:13px;color:#065F46">
+        ✓ Pago en término · Vencía el <strong>${formatoFecha(data.proxima_fecha_pago)}</strong>
+      </div>` : '');
+
     document.getElementById('infoPagoItem').innerHTML = `
-      <div style="font-size:15px;margin-bottom:8px"><strong>${data.productos?.nombre || ''}</strong></div>
+      <div style="font-size:15px;margin-bottom:6px"><strong>${data.productos?.nombre || ''}</strong></div>
       <div class="texto-suave" style="font-size:14px">Cliente: ${data.ventas?.clientes?.nombre || ''}</div>
-      <div style="margin-top:12px;display:flex;gap:20px">
+      <div style="margin-top:12px;display:flex;gap:20px;flex-wrap:wrap">
         <div>
           <div class="texto-suave" style="font-size:12px">DEUDA RESTANTE</div>
           <div style="font-size:22px;font-weight:800;color:var(--error)">${formatoPeso(data.deuda_restante)}</div>
         </div>
         <div>
-          <div class="texto-suave" style="font-size:12px">VALOR CUOTA</div>
+          <div class="texto-suave" style="font-size:12px">CUOTA NORMAL</div>
           <div style="font-size:22px;font-weight:800;color:var(--primario)">${formatoPeso(data.valor_cuota)}</div>
         </div>
+        ${hayMora ? `<div>
+          <div class="texto-suave" style="font-size:12px">CON MORA</div>
+          <div style="font-size:22px;font-weight:800;color:#DC2626">${formatoPeso(totalConMora)}</div>
+        </div>` : ''}
       </div>
+      ${alertaMora}
     `;
 
     abrirModal('modalPago');
@@ -755,8 +895,8 @@
     const notas = document.getElementById('pagoNotas').value.trim();
 
     if (!monto || monto <= 0) { mostrarAlerta('El monto debe ser mayor a 0.', 'error'); return; }
-    if (monto > Number(ventaItemActual.deuda_restante)) {
-      if (!confirm(`El monto supera la deuda restante (${formatoPeso(ventaItemActual.deuda_restante)}). ¿Continuar?`)) return;
+    if (monto > Number(ventaItemActual.deuda_restante) + (ventaItemActual._montoMora || 0) + (ventaItemActual._montoAdmin || 0) + 0.01) {
+      if (!confirm(`El monto supera la deuda restante. ¿Continuar?`)) return;
     }
 
     const btn = document.getElementById('btnRegistrarPago');
@@ -764,17 +904,45 @@
 
     try {
       const usuario = (await sb.auth.getUser()).data.user;
-      const { error } = await sb.from('pagos').insert({
+      const hayMora = ventaItemActual._hayMora || false;
+      const montoMora = hayMora ? (ventaItemActual._montoMora || 0) : 0;
+      const montoAdmin = hayMora ? (ventaItemActual._montoAdmin || 0) : 0;
+
+      // El monto que se descuenta de la deuda es solo el de la cuota original
+      // Los recargos por mora son adicionales (no reducen la deuda del capital)
+      const montoCuotaOriginal = Number(ventaItemActual.valor_cuota);
+      const montoQueReduceDeuda = Math.min(montoCuotaOriginal, monto - montoMora - montoAdmin);
+
+      const { error: errPago } = await sb.from('pagos').insert({
         venta_item_id: ventaItemActual.id,
         monto,
         numero_cuota: nroCuota,
         notas,
-        usuario_id: usuario.id
+        usuario_id: usuario.id,
+        tuvo_mora: hayMora,
+        monto_mora: montoMora,
+        monto_gasto_admin: montoAdmin,
+        monto_cuota_original: montoCuotaOriginal,
+        fecha_vencimiento_cuota: ventaItemActual.proxima_fecha_pago || null
       });
 
-      if (error) throw error;
+      if (errPago) throw errPago;
 
-      mostrarAlerta('Pago registrado correctamente.', 'exito');
+      // Avanzar la proxima_fecha_pago al siguiente vencimiento si hay día fijo
+      if (ventaItemActual.dia_vencimiento && ventaItemActual.proxima_fecha_pago) {
+        const actual = new Date(ventaItemActual.proxima_fecha_pago + 'T00:00:00');
+        const siguiente = new Date(actual);
+        const tipo = ventaItemActual.forma_pago;
+        if (tipo === 'semanal') siguiente.setDate(siguiente.getDate() + 7);
+        else if (tipo === 'quincenal') siguiente.setDate(siguiente.getDate() + 15);
+        else siguiente.setMonth(siguiente.getMonth() + 1);
+
+        await sb.from('venta_items').update({
+          proxima_fecha_pago: siguiente.toISOString().split('T')[0]
+        }).eq('id', ventaItemActual.id);
+      }
+
+      mostrarAlerta(hayMora ? '✅ Pago con mora registrado correctamente.' : '✅ Pago registrado correctamente.', 'exito');
       cerrarModal('modalPago');
       await cargarVentas(document.getElementById('buscarVenta').value.trim());
 
@@ -787,9 +955,10 @@
 
   async function verHistorialPagos(ventaItemId) {
     const { data: item } = await sb.from('venta_items').select(`
-      id, total_item, deuda_restante, forma_pago, cantidad_cuotas,
+      id, total_item, deuda_restante, forma_pago, cantidad_cuotas, valor_cuota,
+      dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin,
       productos(nombre),
-      ventas(clientes(nombre))
+      ventas(vendedor, clientes(nombre))
     `).eq('id', ventaItemId).single();
 
     const { data: pagos } = await sb.from('pagos')
@@ -798,25 +967,45 @@
       .order('fecha_pago', { ascending: true });
 
     const contenido = document.getElementById('historialPagosContenido');
+    const tieneMora = item?.porcentaje_mora > 0 || item?.porcentaje_gasto_admin > 0;
+
     contenido.innerHTML = `
       <div style="background:var(--fondo);border-radius:var(--radio-sm);padding:16px;margin-bottom:20px">
         <div class="fw-600" style="font-size:16px">${item?.productos?.nombre}</div>
-        <div class="texto-suave">Cliente: ${item?.ventas?.clientes?.nombre}</div>
-        <div style="margin-top:8px;display:flex;gap:16px">
+        <div class="texto-suave">Cliente: ${item?.ventas?.clientes?.nombre}${item?.ventas?.vendedor ? ` · Vendedor: ${item.ventas.vendedor}` : ''}</div>
+        <div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
           <div><span class="texto-suave">Total: </span><strong>${formatoPeso(item?.total_item)}</strong></div>
           <div><span class="texto-suave">Deuda: </span><strong style="color:var(--error)">${formatoPeso(item?.deuda_restante)}</strong></div>
+          ${item?.dia_vencimiento ? `<div><span class="texto-suave">Vto.: </span><strong>Día ${item.dia_vencimiento}</strong></div>` : ''}
+          ${tieneMora ? `<div><span class="badge badge-rojo">Mora ${item.porcentaje_mora}% + admin ${item.porcentaje_gasto_admin}%</span></div>` : ''}
         </div>
       </div>
       ${!pagos || pagos.length === 0 ? '<p class="texto-suave texto-centro" style="padding:24px">Sin pagos registrados todavía.</p>' : `
         <div class="tabla-contenedor">
           <table class="tabla">
-            <thead><tr><th>Fecha</th><th>Monto</th><th>Cuota N°</th><th>Notas</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cuota N°</th>
+                <th>Cuota normal</th>
+                ${tieneMora ? '<th>Mora</th><th>G. Admin</th>' : ''}
+                <th>Total pagado</th>
+                <th>Estado</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
             <tbody>
               ${pagos.map((p, i) => `
                 <tr>
                   <td>${formatoFechaHora(p.fecha_pago)}</td>
+                  <td class="texto-centro">${p.numero_cuota || (i + 1)}</td>
+                  <td>${formatoPeso(p.monto_cuota_original || item?.valor_cuota)}</td>
+                  ${tieneMora ? `
+                    <td class="${p.monto_mora > 0 ? 'texto-rojo fw-600' : 'texto-suave'}">${p.monto_mora > 0 ? '+ ' + formatoPeso(p.monto_mora) : '—'}</td>
+                    <td class="${p.monto_gasto_admin > 0 ? 'texto-rojo' : 'texto-suave'}">${p.monto_gasto_admin > 0 ? '+ ' + formatoPeso(p.monto_gasto_admin) : '—'}</td>
+                  ` : ''}
                   <td class="fw-600 texto-verde">${formatoPeso(p.monto)}</td>
-                  <td>${p.numero_cuota || (i + 1)}</td>
+                  <td>${p.tuvo_mora ? '<span class="badge badge-rojo">⚠ Con mora</span>' : '<span class="badge badge-verde">✓ En término</span>'}</td>
                   <td class="texto-suave">${p.notas || '-'}</td>
                 </tr>
               `).join('')}
