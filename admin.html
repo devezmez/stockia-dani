@@ -3,477 +3,611 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stockia — Iniciar sesión</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Stockia — Administración</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
   <style>
-    :root {
-      --primario: #1F3A8A;
-      --primario-hover: #162d6e;
-      --secundario: #3B82F6;
-      --acento: #10B981;
-      --fondo: #F3F4F6;
-      --texto: #111827;
-      --texto-suave: #6B7280;
-      --borde: #E5E7EB;
-      --error: #EF4444;
-      --radio: 12px;
-      --radio-sm: 8px;
-      --transicion: 0.2s ease;
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
     }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--fondo);
-      color: var(--texto);
-      min-height: 100vh;
+    .admin-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--texto-suave);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--borde);
+    }
+    .usuario-row {
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--borde);
     }
-
-    /* Fondo decorativo */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -200px; left: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(31,58,138,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -200px; right: -200px;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .login-contenedor {
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Logo area */
-    .login-logo {
-      text-align: center;
-      margin-bottom: 36px;
-    }
-
-    .logo-svg-area {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--primario);
-      border-radius: 20px;
-      padding: 18px 32px;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 24px rgba(31,58,138,0.3);
-    }
-
-    .login-tagline {
-      font-size: 16px;
-      color: var(--texto-suave);
-      font-weight: 500;
-    }
-
-    /* Tarjeta de login */
-    .login-card {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-      border: 1px solid var(--borde);
-    }
-
-    .login-titulo {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--texto);
-      margin-bottom: 6px;
-    }
-
-    .login-subtitulo {
-      font-size: 15px;
-      color: var(--texto-suave);
-      margin-bottom: 32px;
-    }
-
-    .form-grupo { margin-bottom: 20px; }
-
-    .form-label {
-      display: block;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--texto);
-      margin-bottom: 8px;
-    }
-
-    .input-contenedor { position: relative; }
-
-    .input-icono {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 20px;
-      pointer-events: none;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 15px 16px 15px 46px;
-      border: 2px solid var(--borde);
-      border-radius: var(--radio-sm);
-      font-size: 16px;
-      font-family: 'Inter', sans-serif;
-      color: var(--texto);
-      background: white;
-      transition: var(--transicion);
-      outline: none;
-    }
-
-    .form-input:focus {
-      border-color: var(--secundario);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-    }
-
-    .form-input.error { border-color: var(--error); }
-    .form-error {
-      color: var(--error);
-      font-size: 13px;
-      margin-top: 6px;
-      display: none;
-    }
-    .form-error.visible { display: block; }
-
-    .btn-login {
-      width: 100%;
-      padding: 16px;
+    .usuario-row:last-child { border-bottom: none; }
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
       background: var(--primario);
       color: white;
-      border: none;
-      border-radius: var(--radio-sm);
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      transition: var(--transicion);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin-top: 8px;
+      flex-shrink: 0;
     }
-
-    .btn-login:hover:not(:disabled) { background: var(--primario-hover); transform: translateY(-1px); }
-    .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
-
-    .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+    .avatar.operador { background: var(--texto-suave); }
+    .export-area {
+      background: var(--fondo);
+      border: 2px dashed var(--borde);
+      border-radius: var(--radio);
+      padding: 32px;
+      text-align: center;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .drop-zone {
+      background: var(--fondo);
+      border: 3px dashed var(--borde);
+      border-radius: var(--radio);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transicion);
+    }
+    .drop-zone:hover, .drop-zone.sobre {
+      border-color: var(--secundario);
+      background: #EFF6FF;
+    }
+    /* Ojito en modal */
+    .input-pass-wrap {
+      position: relative;
+    }
+    .input-pass-wrap .form-input {
+      padding-right: 48px;
+    }
+    .btn-ojo {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--texto-suave);
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.15s;
+      user-select: none;
+    }
+    .btn-ojo:hover { color: var(--primario); }
 
-    /* Alerta de error general */
-    .alerta-login {
-      background: #FEF2F2;
-      border: 1px solid #FECACA;
+    /* Info box */
+    .info-box {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
       border-radius: var(--radio-sm);
       padding: 14px 16px;
       font-size: 14px;
-      color: #DC2626;
+      color: #1E40AF;
       margin-bottom: 20px;
-      display: none;
-      align-items: center;
+      display: flex;
       gap: 10px;
+      align-items: flex-start;
     }
-    .alerta-login.visible { display: flex; }
+    .info-box .info-icono { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
 
-    .btn-toggle-pass {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--texto-suave);
-      padding: 4px;
-      line-height: 1;
-      transition: color 0.15s;
-      user-select: none;
-    }
-    .btn-toggle-pass:hover { color: var(--primario); }
-
-    .login-footer {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 13px;
-      color: var(--texto-suave);
-    }
-
-    .copyright-footer {
-      text-align: center;
-      margin-top: 28px;
-      font-size: 12px;
-      color: #9CA3AF;
-    }
-
-    /* Ojito mostrar/ocultar contraseña */
-    .toggle-password {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--texto-suave);
-      padding: 4px;
-      line-height: 1;
-      transition: color 0.15s;
-      user-select: none;
-    }
-    .toggle-password:hover { color: var(--primario); }
-
-    /* Footer copyright */
-    .copyright-footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--texto-suave);
-      opacity: 0.7;
-    }
-
-    /* Indicador de versión */
-    .version-badge {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      font-size: 12px;
-      color: var(--texto-suave);
-      background: white;
-      border: 1px solid var(--borde);
-      padding: 4px 10px;
-      border-radius: 20px;
+    @media (max-width: 768px) {
+      .admin-grid { grid-template-columns: 1fr; }
+      .admin-grid > * { grid-column: auto !important; }
+      .usuario-row { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
+<div class="app-layout">
 
-  <div class="login-contenedor">
-    <!-- Logo -->
-    <div class="login-logo">
-      <div class="logo-svg-area">
-        <!-- Logo SVG inline -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" width="200" height="44">
-          <text x="0" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">St</text>
-          <!-- "o" como caja -->
-          <g transform="translate(52, 6)">
-            <rect x="0" y="11" width="24" height="17" rx="2.5" fill="#10B981"/>
-            <path d="M0 11 L4.5 4 L19.5 4 L24 11 Z" fill="#059669"/>
-            <line x1="0" y1="11" x2="24" y2="11" stroke="white" stroke-width="1.2" stroke-opacity="0.4"/>
-            <line x1="12" y1="11" x2="12" y2="28" stroke="white" stroke-width="1" stroke-opacity="0.3"/>
-          </g>
-          <text x="80" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">ckia</text>
-        </svg>
+  <!-- NAV -->
+  <header class="nav-header">
+    <a href="dashboard.html" class="nav-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" width="140" height="34">
+        <text x="0" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">St</text>
+        <g transform="translate(52, 6)">
+          <rect x="0" y="11" width="24" height="17" rx="2.5" fill="#10B981"/>
+          <path d="M0 11 L4.5 4 L19.5 4 L24 11 Z" fill="#059669"/>
+          <line x1="0" y1="11" x2="24" y2="11" stroke="white" stroke-width="1.2" stroke-opacity="0.4"/>
+          <line x1="12" y1="11" x2="12" y2="28" stroke="white" stroke-width="1" stroke-opacity="0.3"/>
+        </g>
+        <text x="80" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">ckia</text>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html" class="nav-link"><span class="icono">🏠</span> Inicio</a></li>
+      <li><a href="productos.html" class="nav-link"><span class="icono">📦</span> Productos</a></li>
+      <li><a href="clientes.html" class="nav-link"><span class="icono">👥</span> Clientes</a></li>
+      <li><a href="ventas.html" class="nav-link"><span class="icono">💰</span> Ventas</a></li>
+      <li><a href="admin.html" class="nav-link" id="navAdmin"><span class="icono">⚙️</span> Admin</a></li>
+    </ul>
+    <div class="nav-usuario">
+      <div class="nav-usuario-info">
+        <div class="nav-usuario-nombre" id="navNombre">-</div>
+        <div class="nav-usuario-rol" id="navRol">-</div>
       </div>
-      <div class="login-tagline">Tu inventario, bajo control.</div>
+      <button class="btn-salir" onclick="cerrarSesion()">🚪 Salir</button>
+    </div>
+  </header>
+
+  <!-- CONTENIDO -->
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-titulo">⚙️ Administración</h1>
+        <p class="page-subtitulo">Panel exclusivo para administradores</p>
+      </div>
     </div>
 
-    <!-- Card de login -->
-    <div class="login-card">
-      <h1 class="login-titulo">👋 Bienvenido</h1>
-      <p class="login-subtitulo">Ingresá con tu cuenta para continuar</p>
+    <div class="admin-grid">
 
-      <!-- Alerta de error -->
-      <div class="alerta-login" id="alertaLogin">
-        <span>⚠️</span>
-        <span id="alertaLoginTexto"></span>
+      <!-- USUARIOS -->
+      <div class="card" style="grid-column: 1 / -1">
+        <div class="admin-section-title">👥 Gestión de usuarios</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <span class="texto-suave" style="font-size:14px">Usuarios registrados en el sistema</span>
+          <button class="btn btn-acento" onclick="abrirModalNuevoUsuario()">➕ Nuevo Usuario</button>
+        </div>
+        <div id="listaUsuarios"><div class="cargando"><div class="spinner"></div></div></div>
       </div>
 
-      <form id="formLogin" novalidate>
+      <!-- CONFIGURACIÓN -->
+      <div class="card">
+        <div class="admin-section-title">📧 Configuración del sistema</div>
         <div class="form-grupo">
-          <label class="form-label" for="email">📧 Correo electrónico</label>
-          <div class="input-contenedor">
-            <input
-              type="email"
-              id="email"
-              class="form-input"
-              placeholder="tu@email.com"
-              autocomplete="email"
-              inputmode="email"
-              required
-            >
-          </div>
-          <div class="form-error" id="errorEmail">Por favor ingresá un email válido.</div>
+          <label class="form-label">Nombre del negocio</label>
+          <input type="text" id="cfgNombre" class="form-input" placeholder="Ej: Mi Negocio">
         </div>
-
         <div class="form-grupo">
-          <label class="form-label" for="password">🔒 Contraseña</label>
-          <div class="input-contenedor">
-            <input
-              type="password"
-              id="password"
-              class="form-input"
-              placeholder="Tu contraseña"
-              autocomplete="current-password"
-              style="padding-right: 48px"
-              required
-            >
-            <button type="button" class="btn-toggle-pass" id="btnTogglePass" onclick="togglePassword()" title="Mostrar / ocultar contraseña">
-              👁️
-            </button>
-          </div>
-          <div class="form-error" id="errorPassword">Por favor ingresá tu contraseña.</div>
+          <label class="form-label">Email para resumen semanal</label>
+          <input type="email" id="cfgEmail" class="form-input" placeholder="admin@tunegocio.com">
         </div>
+        <button class="btn btn-primario w-100" onclick="guardarConfiguracion()">💾 Guardar configuración</button>
+      </div>
 
-        <button type="submit" class="btn-login" id="btnLogin">
-          <span id="btnLoginTexto">Ingresar al sistema</span>
+      <!-- EXPORTAR -->
+      <div class="card">
+        <div class="admin-section-title">💾 Exportar base de datos</div>
+        <div class="export-area">
+          <div style="font-size:48px;margin-bottom:12px">📤</div>
+          <div class="fw-700" style="font-size:18px;margin-bottom:8px">Exportar todo el sistema</div>
+          <div class="texto-suave" style="font-size:14px;margin-bottom:20px">
+            Descargá un archivo JSON con productos, clientes, ventas y pagos completos.
+          </div>
+          <button class="btn btn-primario btn-lg" id="btnExportar" onclick="exportarDB()">
+            📥 Descargar backup JSON
+          </button>
+        </div>
+      </div>
+
+      <!-- IMPORTAR -->
+      <div class="card" style="grid-column: 1 / -1">
+        <div class="admin-section-title">📂 Importar / Restaurar base de datos</div>
+        <div style="background:#FFF7ED;border:1px solid #FDE68A;border-radius:var(--radio-sm);padding:14px;margin-bottom:16px">
+          ⚠️ <strong>Atención:</strong> La importación reemplazará los datos existentes. Hacé un backup antes de continuar.
+        </div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('inputImportar').click()">
+          <div style="font-size:48px;margin-bottom:12px">📂</div>
+          <div class="fw-700" style="font-size:18px;margin-bottom:8px">Seleccioná el archivo JSON</div>
+          <div class="texto-suave" style="font-size:14px">O arrastrá el archivo aquí</div>
+          <input type="file" id="inputImportar" accept=".json" style="display:none" onchange="procesarImportacion(this.files[0])">
+        </div>
+        <div id="vistaPrevia" style="display:none;margin-top:16px"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    © <span class="anio-actual"></span> Stockia. Todos los derechos reservados.
+  </footer>
+
+</div>
+
+<!-- ============================================================
+     MODAL: Nuevo usuario
+     ============================================================ -->
+<div class="modal-overlay" id="modalNuevoUsuario">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-titulo">👤 Nuevo Usuario</h2>
+      <button class="modal-cerrar" onclick="cerrarModal('modalNuevoUsuario')">✕</button>
+    </div>
+
+    <div class="info-box">
+      <span class="info-icono">ℹ️</span>
+      <span>El usuario se creará con acceso inmediato al sistema. No se envía email de verificación.</span>
+    </div>
+
+    <div class="form-grupo">
+      <label class="form-label">Nombre completo *</label>
+      <input type="text" id="nuNombre" class="form-input" placeholder="Ej: María González">
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Email *</label>
+      <input type="email" id="nuEmail" class="form-input" placeholder="usuario@email.com" autocomplete="off">
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Contraseña *</label>
+      <div class="input-pass-wrap">
+        <input type="password" id="nuPassword" class="form-input"
+          placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+        <button type="button" class="btn-ojo" id="btnOjoPassword"
+          onclick="toggleOjo('nuPassword','btnOjoPassword')" title="Mostrar contraseña">
+          👁️
         </button>
-      </form>
-
-      <div class="login-footer">
-        ¿Problemas para ingresar? Contactá al administrador.
+      </div>
+      <div style="font-size:12px;color:var(--texto-suave);margin-top:5px">
+        Mínimo 8 caracteres. Recomendado: combinar letras, números y símbolos.
       </div>
     </div>
+    <div class="form-grupo">
+      <label class="form-label">Rol *</label>
+      <select id="nuRol" class="form-select">
+        <option value="operador">👤 Operador — acceso al sistema sin configuración</option>
+        <option value="admin">⭐ Administrador — acceso total + panel admin</option>
+      </select>
+    </div>
+
+    <!-- Alerta de error del modal -->
+    <div id="alertaModalUsuario" style="display:none;background:#FEF2F2;border:1px solid #FECACA;
+      border-radius:var(--radio-sm);padding:12px 14px;font-size:14px;color:#DC2626;
+      margin-bottom:8px;align-items:center;gap:8px">
+      <span>⚠️</span><span id="alertaModalUsuarioTexto"></span>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalNuevoUsuario')">Cancelar</button>
+      <button class="btn btn-primario" id="btnCrearUsuario" onclick="crearUsuario()">
+        👤 Crear Usuario
+      </button>
+    </div>
   </div>
+</div>
 
-  <div class="copyright-footer">
-    © <span id="anioActual"></span> Stockia. Todos los derechos reservados.
-  </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/global.js"></script>
+<script>
+let perfilActual = null;
+let datosImportacion = null;
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // ⚠️ REEMPLAZAR CON TUS CREDENCIALES
-    const SUPABASE_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrd3RzcGdicHFqd3Z5YWx3eW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3MTgsImV4cCI6MjA5MDE5NDcxOH0.b0BOSZApkFBiNVHrusCltKJtx_lGCf9cRncxUn8jr7U';
+// ⚠️ REEMPLAZAR con la URL de tu proyecto Supabase
+// Esta URL se usa para llamar a la Edge Function crear-usuario
+const SUPABASE_FUNCTIONS_URL = 'https://TU_PROYECTO.supabase.co/functions/v1';
 
-    const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+async function init() {
+  const resultado = await verificarSesion('admin');
+  if (!resultado) return;
+  perfilActual = resultado.perfil;
 
-    // Año dinámico en el footer
-    document.getElementById('anioActual').textContent = new Date().getFullYear();
+  document.getElementById('navNombre').textContent = perfilActual.nombre;
+  document.getElementById('navRol').textContent = '⭐ Administrador';
+  marcarNavActivo();
 
-    // Toggle mostrar / ocultar contraseña
-    function togglePassword() {
-      const input = document.getElementById('password');
-      const btn = document.getElementById('btnTogglePass');
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈';
-        btn.title = 'Ocultar contraseña';
-      } else {
-        input.type = 'password';
-        btn.textContent = '👁️';
-        btn.title = 'Mostrar contraseña';
-      }
-    }
+  // Año dinámico en footer
+  document.querySelectorAll('.anio-actual').forEach(el => el.textContent = new Date().getFullYear());
 
-    // Si ya hay sesión, redirigir
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if (session) window.location.href = '/dashboard.html';
+  await cargarUsuarios();
+  await cargarConfiguracion();
+  configurarDropZone();
+}
+
+// ============================================================
+// USUARIOS
+// ============================================================
+
+async function cargarUsuarios() {
+  const { data, error } = await sb.from('profiles').select('*').order('nombre');
+  const container = document.getElementById('listaUsuarios');
+
+  if (error || !data || data.length === 0) {
+    container.innerHTML = `
+      <div class="estado-vacio">
+        <div class="estado-vacio-icono">👥</div>
+        <div class="estado-vacio-titulo">Sin usuarios registrados</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = data.map(u => `
+    <div class="usuario-row">
+      <div class="avatar ${u.rol === 'operador' ? 'operador' : ''}">
+        ${u.nombre.charAt(0).toUpperCase()}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="fw-600" style="font-size:16px">${u.nombre}</div>
+        <div class="texto-suave" style="font-size:13px;word-break:break-all">${u.email}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="badge ${u.rol === 'admin' ? 'badge-azul' : 'badge-gris'}">
+          ${u.rol === 'admin' ? '⭐ Admin' : '👤 Operador'}
+        </span>
+        <span class="badge ${u.activo ? 'badge-verde' : 'badge-rojo'}">
+          ${u.activo ? '● Activo' : '○ Inactivo'}
+        </span>
+        ${u.id !== perfilActual.id
+          ? `<button class="btn btn-ghost btn-sm"
+               onclick="toggleUsuario('${u.id}', ${u.activo}, '${u.nombre.replace(/'/g,"\\'")}')">
+               ${u.activo ? '🔴 Desactivar' : '🟢 Activar'}
+             </button>`
+          : '<span class="texto-suave" style="font-size:13px">(vos)</span>'
+        }
+      </div>
+    </div>
+  `).join('');
+}
+
+async function toggleUsuario(id, activo, nombre) {
+  const accion = activo ? 'desactivar' : 'activar';
+  if (!confirm(`¿${accion.charAt(0).toUpperCase() + accion.slice(1)} al usuario "${nombre}"?`)) return;
+  const { error } = await sb.from('profiles').update({ activo: !activo }).eq('id', id);
+  if (error) { mostrarAlerta('Error al actualizar el usuario.', 'error'); return; }
+  mostrarAlerta(`Usuario ${!activo ? 'activado' : 'desactivado'}.`, 'exito');
+  await cargarUsuarios();
+}
+
+function abrirModalNuevoUsuario() {
+  // Limpiar formulario
+  document.getElementById('nuNombre').value = '';
+  document.getElementById('nuEmail').value = '';
+  document.getElementById('nuPassword').value = '';
+  document.getElementById('nuRol').value = 'operador';
+  document.getElementById('alertaModalUsuario').style.display = 'none';
+  // Resetear ojito
+  const input = document.getElementById('nuPassword');
+  const btn = document.getElementById('btnOjoPassword');
+  input.type = 'password';
+  btn.textContent = '👁️';
+  abrirModal('modalNuevoUsuario');
+}
+
+function mostrarErrorModal(msg) {
+  const alerta = document.getElementById('alertaModalUsuario');
+  document.getElementById('alertaModalUsuarioTexto').textContent = msg;
+  alerta.style.display = 'flex';
+}
+
+async function crearUsuario() {
+  const nombre   = document.getElementById('nuNombre').value.trim();
+  const email    = document.getElementById('nuEmail').value.trim();
+  const password = document.getElementById('nuPassword').value;
+  const rol      = document.getElementById('nuRol').value;
+
+  document.getElementById('alertaModalUsuario').style.display = 'none';
+
+  // Validaciones en frontend
+  if (!nombre) { mostrarErrorModal('El nombre es obligatorio.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    mostrarErrorModal('Ingresá un email válido.'); return;
+  }
+  if (!password || password.length < 8) {
+    mostrarErrorModal('La contraseña debe tener al menos 8 caracteres.'); return;
+  }
+
+  const btn = document.getElementById('btnCrearUsuario');
+  btn.disabled = true;
+  btn.textContent = '⏳ Creando...';
+
+  try {
+    // Obtener el token JWT del admin actual para enviarlo a la Edge Function
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) throw new Error('Sin sesión');
+
+    const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/crear-usuario`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ nombre, email, password, rol })
     });
 
-    const form = document.getElementById('formLogin');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnTexto = document.getElementById('btnLoginTexto');
-    const alerta = document.getElementById('alertaLogin');
-    const alertaTexto = document.getElementById('alertaLoginTexto');
+    const resultado = await resp.json();
 
-    function mostrarAlertaLogin(msg) {
-      alertaTexto.textContent = msg;
-      alerta.classList.add('visible');
+    if (!resp.ok || resultado.error) {
+      mostrarErrorModal(resultado.error || 'Error al crear el usuario.');
+      return;
     }
 
-    function ocultarAlertaLogin() {
-      alerta.classList.remove('visible');
+    mostrarAlerta(`✅ Usuario "${nombre}" creado correctamente.`, 'exito');
+    cerrarModal('modalNuevoUsuario');
+    await cargarUsuarios();
+
+  } catch (err) {
+    console.error(err);
+    mostrarErrorModal('Error de conexión. Verificá que la Edge Function esté desplegada.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '👤 Crear Usuario';
+  }
+}
+
+// ============================================================
+// OJITO - Mostrar / ocultar contraseña (genérico)
+// ============================================================
+function toggleOjo(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn   = document.getElementById(btnId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+    btn.title = 'Ocultar contraseña';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+    btn.title = 'Mostrar contraseña';
+  }
+}
+
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+
+async function cargarConfiguracion() {
+  const { data } = await sb.from('configuracion').select('*').single();
+  if (data) {
+    document.getElementById('cfgEmail').value = data.email_resumen || '';
+    document.getElementById('cfgNombre').value = data.nombre_negocio || '';
+  }
+}
+
+async function guardarConfiguracion() {
+  const email  = document.getElementById('cfgEmail').value.trim();
+  const nombre = document.getElementById('cfgNombre').value.trim();
+  const { error } = await sb.from('configuracion')
+    .update({ email_resumen: email, nombre_negocio: nombre })
+    .eq('id', 1);
+  if (error) { mostrarAlerta('Error al guardar.', 'error'); return; }
+  mostrarAlerta('Configuración guardada.', 'exito');
+}
+
+// ============================================================
+// EXPORTAR
+// ============================================================
+
+async function exportarDB() {
+  const btn = document.getElementById('btnExportar');
+  btn.disabled = true; btn.textContent = '⏳ Exportando...';
+
+  try {
+    const [productos, clientes, ventas, ventaItems, pagos, movimientos] = await Promise.all([
+      sb.from('productos').select('*'),
+      sb.from('clientes').select('*'),
+      sb.from('ventas').select('*'),
+      sb.from('venta_items').select('*'),
+      sb.from('pagos').select('*'),
+      sb.from('stock_movimientos').select('*')
+    ]);
+
+    const backup = {
+      version: '1.1',
+      fecha_exportacion: new Date().toISOString(),
+      datos: {
+        productos: productos.data || [],
+        clientes: clientes.data || [],
+        ventas: ventas.data || [],
+        venta_items: ventaItems.data || [],
+        pagos: pagos.data || [],
+        stock_movimientos: movimientos.data || []
+      }
+    };
+
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `stockia_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarAlerta('Backup exportado correctamente.', 'exito');
+
+  } catch (err) {
+    mostrarAlerta('Error al exportar la base de datos.', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '📥 Descargar backup JSON';
+  }
+}
+
+// ============================================================
+// IMPORTAR
+// ============================================================
+
+function configurarDropZone() {
+  const zone = document.getElementById('dropZone');
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('sobre'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('sobre'));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('sobre');
+    const file = e.dataTransfer.files[0];
+    if (file) procesarImportacion(file);
+  });
+}
+
+function procesarImportacion(file) {
+  if (!file || !file.name.endsWith('.json')) {
+    mostrarAlerta('Seleccioná un archivo JSON válido.', 'error');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const datos = JSON.parse(e.target.result);
+      if (!datos.datos || !datos.version) throw new Error('Formato inválido');
+
+      datosImportacion = datos;
+      const d = datos.datos;
+      const vistaPrevia = document.getElementById('vistaPrevia');
+      vistaPrevia.style.display = 'block';
+      vistaPrevia.innerHTML = `
+        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--radio-sm);padding:20px;margin-bottom:16px">
+          <div class="fw-700" style="margin-bottom:8px">✅ Archivo válido: ${file.name}</div>
+          <div class="texto-suave" style="font-size:14px">
+            Exportado el: ${new Date(datos.fecha_exportacion).toLocaleString('es-AR')} · v${datos.version}
+          </div>
+          <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:14px">
+            <div>📦 ${d.productos?.length || 0} productos</div>
+            <div>👥 ${d.clientes?.length || 0} clientes</div>
+            <div>💰 ${d.ventas?.length || 0} ventas</div>
+            <div>💳 ${d.pagos?.length || 0} pagos</div>
+            <div>📋 ${d.venta_items?.length || 0} ítems</div>
+            <div>📊 ${d.stock_movimientos?.length || 0} movimientos</div>
+          </div>
+        </div>
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radio-sm);padding:14px;margin-bottom:16px;font-size:14px">
+          ⚠️ Esta acción reemplazará los datos existentes. No se puede deshacer.
+        </div>
+        <button class="btn btn-peligro btn-lg w-100" onclick="confirmarImportacion()">
+          🔄 Confirmar restauración
+        </button>
+      `;
+    } catch (err) {
+      mostrarAlerta('El archivo no es un backup válido de Stockia.', 'error');
     }
+  };
+  reader.readAsText(file);
+}
 
-    function setLoading(cargando) {
-      btnLogin.disabled = cargando;
-      btnTexto.innerHTML = cargando
-        ? '<div class="spinner"></div>'
-        : 'Ingresar al sistema';
-    }
+async function confirmarImportacion() {
+  if (!datosImportacion) return;
+  if (!confirm('¿Estás SEGURO? Esta acción borrará y reemplazará todos los datos actuales.')) return;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      ocultarAlertaLogin();
+  try {
+    const d = datosImportacion.datos;
+    mostrarAlerta('Importando datos... no cierres la página.', 'info', 10000);
 
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+    if (d.productos?.length)         await sb.from('productos').upsert(d.productos, { onConflict: 'id' });
+    if (d.clientes?.length)          await sb.from('clientes').upsert(d.clientes, { onConflict: 'id' });
+    if (d.ventas?.length)            await sb.from('ventas').upsert(d.ventas, { onConflict: 'id' });
+    if (d.venta_items?.length)       await sb.from('venta_items').upsert(d.venta_items, { onConflict: 'id' });
+    if (d.pagos?.length)             await sb.from('pagos').upsert(d.pagos, { onConflict: 'id' });
+    if (d.stock_movimientos?.length) await sb.from('stock_movimientos').upsert(d.stock_movimientos, { onConflict: 'id' });
 
-      // Validaciones
-      let valido = true;
+    mostrarAlerta('¡Importación completada exitosamente!', 'exito');
+    document.getElementById('vistaPrevia').style.display = 'none';
+    datosImportacion = null;
 
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById('errorEmail').classList.add('visible');
-        document.getElementById('email').classList.add('error');
-        valido = false;
-      } else {
-        document.getElementById('errorEmail').classList.remove('visible');
-        document.getElementById('email').classList.remove('error');
-      }
+  } catch (err) {
+    mostrarAlerta('Error durante la importación. Verificá el archivo.', 'error');
+    console.error(err);
+  }
+}
 
-      if (!password) {
-        document.getElementById('errorPassword').classList.add('visible');
-        document.getElementById('password').classList.add('error');
-        valido = false;
-      } else {
-        document.getElementById('errorPassword').classList.remove('visible');
-        document.getElementById('password').classList.remove('error');
-      }
-
-      if (!valido) return;
-
-      setLoading(true);
-
-      try {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-        if (error) {
-          mostrarAlertaLogin('Email o contraseña incorrectos. Verificá tus datos.');
-          setLoading(false);
-          return;
-        }
-
-        // Verificar que el usuario esté activo
-        const { data: perfil, error: perfilError } = await sb
-          .from('profiles')
-          .select('activo, rol')
-          .eq('id', data.user.id)
-          .single();
-
-        if (perfilError || !perfil || !perfil.activo) {
-          await sb.auth.signOut();
-          mostrarAlertaLogin('Tu cuenta está desactivada. Contactá al administrador.');
-          setLoading(false);
-          return;
-        }
-
-        // Redirigir al dashboard
-        window.location.href = '/dashboard.html';
-
-      } catch (err) {
-        mostrarAlertaLogin('Error de conexión. Intentá nuevamente.');
-        setLoading(false);
-      }
-    });
-  </script>
+init();
+</script>
 </body>
 </html>
