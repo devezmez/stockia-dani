@@ -223,6 +223,10 @@
     </div>
 
   </main>
+
+  <footer class="app-footer">
+    © <span class="anio-actual"></span> Stockia. Todos los derechos reservados.
+  </footer>
 </div>
 
 <!-- MODAL: Registrar pago -->
@@ -286,8 +290,7 @@
     document.getElementById('navRol').textContent = perfilActual.rol === 'admin' ? '⭐ Administrador' : '👤 Operador';
     if (perfilActual.rol === 'admin') document.getElementById('navAdmin').style.display = 'flex';
     marcarNavActivo();
-
-    await cargarVentas();
+    document.querySelectorAll('.anio-actual').forEach(el => el.textContent = new Date().getFullYear());
     await cargarProductosCatalogo();
     configurarBuscadorVentas();
     configurarBuscadoresNuevaVenta();

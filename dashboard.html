@@ -136,6 +136,10 @@
       </div>
 
     </main>
+
+    <footer class="app-footer">
+      © <span class="anio-actual"></span> Stockia. Todos los derechos reservados.
+    </footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -156,6 +160,9 @@
       if (perfilActual.rol === 'admin') {
         document.getElementById('navAdmin').style.display = 'flex';
       }
+
+      // Año footer dinámico
+      document.querySelectorAll('.anio-actual').forEach(el => el.textContent = new Date().getFullYear());
 
       // Fecha
       document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-AR', {

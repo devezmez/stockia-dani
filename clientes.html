@@ -76,6 +76,10 @@
     </div>
 
   </main>
+
+  <footer class="app-footer">
+    © <span class="anio-actual"></span> Stockia. Todos los derechos reservados.
+  </footer>
 </div>
 
 <!-- MODAL: Nuevo / Editar Cliente -->
@@ -140,8 +144,7 @@
     document.getElementById('navRol').textContent = perfilActual.rol === 'admin' ? '⭐ Administrador' : '👤 Operador';
     if (perfilActual.rol === 'admin') document.getElementById('navAdmin').style.display = 'flex';
     marcarNavActivo();
-
-    await cargarClientes();
+    document.querySelectorAll('.anio-actual').forEach(el => el.textContent = new Date().getFullYear());
 
     let timer;
     document.getElementById('buscarCliente').addEventListener('input', (e) => {
