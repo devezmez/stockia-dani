@@ -3,8 +3,8 @@
 // ============================================================
 
 // ⚠️ REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES DE SUPABASE
-const SUPABASE_URL = 'https://TU_PROYECTO.supabase.co';
-const SUPABASE_ANON_KEY = 'TU_ANON_KEY';
+const SUPABASE_URL = 'https://stockia-dani.pages.dev/';
+const SUPABASE_ANON_KEY = 'sb_publishable_6idZw1dR0QeIuR-sIvTDDg_1mYebYEL';
 
 // Inicializar cliente Supabase
 const { createClient } = supabase;
