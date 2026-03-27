@@ -4,7 +4,7 @@
 
 // ⚠️ REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES DE SUPABASE
 const SUPABASE_URL = 'https://stockia-dani.pages.dev/login';
-const SUPABASE_ANON_KEY = 'sb_publishable_6idZw1dR0QeIuR-sIvTDDg_1mYebYEL';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhcWF1Y2VmZXlyeGN5ZWhycmVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzI5OTUsImV4cCI6MjA5MDE0ODk5NX0.AhX_emKBhnBabdRBP4Rn0g4ubxYl3pxuk9Rf-tiM03g';
 
 // Inicializar cliente Supabase
 const { createClient } = supabase;
