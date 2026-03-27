@@ -181,7 +181,11 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    var SUPABASE_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrd3RzcGdicHFqd3Z5YWx3eW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3MTgsImV4cCI6MjA5MDE5NDcxOH0.b0BOSZApkFBiNVHrusCltKJtx_lGCf9cRncxUn8jr7U';
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/global.js"></script>
 <script>
   let perfilActual = null;
@@ -211,7 +215,19 @@
 
     const { data, error } = await q;
 
-    if (error || !data || data.length === 0) {
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="6">
+        <div class="estado-vacio">
+          <div class="estado-vacio-icono">⚠️</div>
+          <div class="estado-vacio-titulo">Error al cargar productos</div>
+          <div class="estado-vacio-desc" style="color:var(--error);font-family:monospace;font-size:13px">${error.message}</div>
+        </div>
+      </td></tr>`;
+      console.error('Error productos:', error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6">
         <div class="estado-vacio">
           <div class="estado-vacio-icono">📦</div>
