@@ -304,6 +304,7 @@
       .from('venta_items')
       .select(`
         id, forma_pago, cantidad_cuotas, valor_cuota, total_item, deuda_restante, estado, proxima_fecha_pago, created_at,
+        porcentaje_recargo, precio_base_total,
         productos(nombre),
         ventas(id, clientes(nombre))
       `)
@@ -345,7 +346,10 @@
         <td class="fw-600">${v.ventas?.clientes?.nombre || '-'}</td>
         <td>${v.productos?.nombre || '-'}</td>
         <td>${formaPagoLabel[v.forma_pago] || v.forma_pago}</td>
-        <td class="texto-centro">${v.cantidad_cuotas || 1}</td>
+        <td class="texto-centro">
+          ${v.cantidad_cuotas || 1}
+          ${v.porcentaje_recargo > 0 ? `<br><span class="badge badge-naranja" style="font-size:11px">+${v.porcentaje_recargo}%</span>` : ''}
+        </td>
         <td class="fw-600">${formatoPeso(v.total_item)}</td>
         <td class="${Number(v.deuda_restante) > 0 ? 'texto-rojo fw-600' : 'texto-verde'}">${formatoPeso(v.deuda_restante)}</td>
         <td>${estadoBadge[v.estado] || v.estado}</td>
@@ -462,7 +466,7 @@
     const id = ++contadorItems;
     itemsVenta.push({
       id, producto: prod, cantidad: 1,
-      forma_pago: 'contado', cuotas: 1, precio: prod.precio
+      forma_pago: 'contado', cuotas: 1, precio: prod.precio, recargo: 0
     });
 
     document.getElementById('resultadosProductoVenta').innerHTML = '';
@@ -480,8 +484,11 @@
     }
 
     container.innerHTML = itemsVenta.map(item => {
-      const total = item.precio * item.cantidad;
-      const cuotaValor = item.cuotas > 0 ? total / item.cuotas : total;
+      const totalBase = item.precio * item.cantidad;
+      const recargoPct = item.recargo || 0;
+      const montoRecargo = totalBase * recargoPct / 100;
+      const totalConRecargo = totalBase + montoRecargo;
+      const cuotaValor = item.cuotas > 0 ? totalConRecargo / item.cuotas : totalConRecargo;
 
       return `
         <div class="item-venta-card">
@@ -495,7 +502,7 @@
                 onchange="actualizarItem(${item.id}, 'cantidad', this.value)">
             </div>
             <div>
-              <label class="form-label" style="font-size:13px">Precio unitario</label>
+              <label class="form-label" style="font-size:13px">Precio unitario (contado)</label>
               <input type="number" value="${item.precio}" min="0" step="0.01"
                 class="form-input" style="font-size:15px;padding:10px"
                 onchange="actualizarItem(${item.id}, 'precio', this.value)">
@@ -512,18 +519,43 @@
             </select>
           </div>
           ${item.forma_pago !== 'contado' ? `
-            <div class="form-grupo" style="margin-bottom:0">
-              <label class="form-label" style="font-size:13px">Cantidad de cuotas</label>
-              <input type="number" value="${item.cuotas}" min="1" max="52"
-                class="form-input" style="font-size:15px;padding:10px"
-                onchange="actualizarItem(${item.id}, 'cuotas', this.value)">
+            <div class="form-fila" style="gap:12px;margin-bottom:0">
+              <div class="form-grupo" style="margin-bottom:0">
+                <label class="form-label" style="font-size:13px">Cantidad de cuotas</label>
+                <input type="number" value="${item.cuotas}" min="1" max="52"
+                  class="form-input" style="font-size:15px;padding:10px"
+                  onchange="actualizarItem(${item.id}, 'cuotas', this.value)">
+              </div>
+              <div class="form-grupo" style="margin-bottom:0">
+                <label class="form-label" style="font-size:13px">📈 Recargo por cuotas (%)</label>
+                <input type="number" value="${recargoPct}" min="0" max="200" step="0.5"
+                  class="form-input" style="font-size:15px;padding:10px"
+                  placeholder="0"
+                  onchange="actualizarItem(${item.id}, 'recargo', this.value)">
+              </div>
             </div>
-            <div class="cuota-preview">
-              💡 ${item.cuotas} cuota${item.cuotas > 1 ? 's' : ''} de <strong>${formatoPeso(cuotaValor)}</strong>
-              · Total: <strong>${formatoPeso(total)}</strong>
+            <div class="cuota-preview" style="margin-top:10px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span>Precio contado:</span>
+                <strong>${formatoPeso(totalBase)}</strong>
+              </div>
+              ${recargoPct > 0 ? `
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#B45309">
+                <span>Recargo ${recargoPct}%:</span>
+                <strong>+ ${formatoPeso(montoRecargo)}</strong>
+              </div>` : ''}
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;padding-top:4px;border-top:1px solid #A7F3D0">
+                <span>Total en cuotas:</span>
+                <strong style="font-size:15px">${formatoPeso(totalConRecargo)}</strong>
+              </div>
+              <div style="font-size:15px;font-weight:700">
+                💡 ${item.cuotas} cuota${item.cuotas > 1 ? 's' : ''} de ${formatoPeso(cuotaValor)}
+              </div>
             </div>
           ` : `
-            <div style="font-size:14px;color:var(--texto-suave)">Total: <strong style="color:var(--texto);font-size:16px">${formatoPeso(total)}</strong></div>
+            <div style="font-size:14px;color:var(--texto-suave);margin-top:8px">
+              💵 Total contado: <strong style="color:var(--texto);font-size:16px">${formatoPeso(totalBase)}</strong>
+            </div>
           `}
         </div>
       `;
@@ -535,8 +567,9 @@
     if (!item) return;
     if (campo === 'cantidad') item.cantidad = Math.max(1, parseInt(valor) || 1);
     else if (campo === 'precio') item.precio = Math.max(0, parseFloat(valor) || 0);
-    else if (campo === 'forma_pago') { item.forma_pago = valor; if (valor === 'contado') item.cuotas = 1; }
+    else if (campo === 'forma_pago') { item.forma_pago = valor; if (valor === 'contado') { item.cuotas = 1; item.recargo = 0; } }
     else if (campo === 'cuotas') item.cuotas = Math.max(1, parseInt(valor) || 1);
+    else if (campo === 'recargo') item.recargo = Math.max(0, Math.min(200, parseFloat(valor) || 0));
     renderizarItems();
     actualizarResumen();
   }
@@ -557,7 +590,12 @@
       return;
     }
 
-    const totalVenta = itemsVenta.reduce((a, i) => a + (i.precio * i.cantidad), 0);
+    const totalBase = itemsVenta.reduce((a, i) => a + (i.precio * i.cantidad), 0);
+    const totalConRecargo = itemsVenta.reduce((a, i) => {
+      const base = i.precio * i.cantidad;
+      return a + base + (base * (i.recargo || 0) / 100);
+    }, 0);
+    const hayRecargo = itemsVenta.some(i => (i.recargo || 0) > 0 && i.forma_pago !== 'contado');
 
     container.innerHTML = `
       <div style="margin-bottom:12px">
@@ -566,10 +604,18 @@
       </div>
       <div class="resumen-venta">
         ${itemsVenta.map(item => {
-          const subtotal = item.precio * item.cantidad;
-          return `<div class="linea"><span>${item.producto.nombre} x${item.cantidad}</span><span>${formatoPeso(subtotal)}</span></div>`;
+          const base = item.precio * item.cantidad;
+          const conRec = base + base * (item.recargo || 0) / 100;
+          const esContado = item.forma_pago === 'contado';
+          return `<div class="linea">
+            <span>${item.producto.nombre} x${item.cantidad}${!esContado && item.recargo > 0 ? ` <span style="opacity:.7;font-size:12px">(+${item.recargo}%)</span>` : ''}</span>
+            <span>${formatoPeso(esContado ? base : conRec)}</span>
+          </div>`;
         }).join('')}
-        <div class="linea"><span>TOTAL</span><span>${formatoPeso(totalVenta)}</span></div>
+        ${hayRecargo ? `
+          <div class="linea" style="opacity:.75;font-size:13px"><span>Precio contado</span><span>${formatoPeso(totalBase)}</span></div>
+        ` : ''}
+        <div class="linea"><span>TOTAL A COBRAR</span><span>${formatoPeso(totalConRecargo)}</span></div>
       </div>
     `;
 
@@ -593,7 +639,10 @@
 
     try {
       const usuario = (await sb.auth.getUser()).data.user;
-      const totalVenta = itemsVenta.reduce((a, i) => a + (i.precio * i.cantidad), 0);
+      const totalVenta = itemsVenta.reduce((a, i) => {
+        const base = i.precio * i.cantidad;
+        return a + base + (base * (i.recargo || 0) / 100);
+      }, 0);
 
       // Crear venta
       const { data: venta, error: errVenta } = await sb.from('ventas').insert({
@@ -616,8 +665,11 @@
 
       // Crear items de venta
       const insertItems = itemsVenta.map(item => {
-        const total = item.precio * item.cantidad;
-        const cuotaValor = item.cuotas > 0 ? total / item.cuotas : total;
+        const totalBase = item.precio * item.cantidad;
+        const recargoPct = item.forma_pago === 'contado' ? 0 : (item.recargo || 0);
+        const montoRecargo = totalBase * recargoPct / 100;
+        const totalConRecargo = totalBase + montoRecargo;
+        const cuotaValor = item.cuotas > 0 ? totalConRecargo / item.cuotas : totalConRecargo;
         return {
           venta_id: venta.id,
           producto_id: item.producto.id,
@@ -626,8 +678,10 @@
           forma_pago: item.forma_pago,
           cantidad_cuotas: item.cuotas,
           valor_cuota: cuotaValor,
-          total_item: total,
-          deuda_restante: item.forma_pago === 'contado' ? 0 : total,
+          total_item: totalConRecargo,
+          precio_base_total: totalBase,
+          porcentaje_recargo: recargoPct,
+          deuda_restante: item.forma_pago === 'contado' ? 0 : totalConRecargo,
           estado: item.forma_pago === 'contado' ? 'pagado' : 'activo',
           proxima_fecha_pago: item.forma_pago !== 'contado' ? proximaFecha(item.forma_pago) : null
         };
