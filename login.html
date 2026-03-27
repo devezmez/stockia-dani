@@ -200,62 +200,11 @@
     }
     .alerta-login.visible { display: flex; }
 
-    .btn-toggle-pass {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--texto-suave);
-      padding: 4px;
-      line-height: 1;
-      transition: color 0.15s;
-      user-select: none;
-    }
-    .btn-toggle-pass:hover { color: var(--primario); }
-
     .login-footer {
       text-align: center;
       margin-top: 24px;
       font-size: 13px;
       color: var(--texto-suave);
-    }
-
-    .copyright-footer {
-      text-align: center;
-      margin-top: 28px;
-      font-size: 12px;
-      color: #9CA3AF;
-    }
-
-    /* Ojito mostrar/ocultar contraseña */
-    .toggle-password {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--texto-suave);
-      padding: 4px;
-      line-height: 1;
-      transition: color 0.15s;
-      user-select: none;
-    }
-    .toggle-password:hover { color: var(--primario); }
-
-    /* Footer copyright */
-    .copyright-footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--texto-suave);
-      opacity: 0.7;
     }
 
     /* Indicador de versión */
@@ -331,12 +280,8 @@
               class="form-input"
               placeholder="Tu contraseña"
               autocomplete="current-password"
-              style="padding-right: 48px"
               required
             >
-            <button type="button" class="btn-toggle-pass" id="btnTogglePass" onclick="togglePassword()" title="Mostrar / ocultar contraseña">
-              👁️
-            </button>
           </div>
           <div class="form-error" id="errorPassword">Por favor ingresá tu contraseña.</div>
         </div>
@@ -352,9 +297,7 @@
     </div>
   </div>
 
-  <div class="copyright-footer">
-    © <span id="anioActual"></span> Stockia. Todos los derechos reservados.
-  </div>
+  <div class="version-badge">Stockia v1.0</div>
 
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -365,24 +308,6 @@
 
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Año dinámico en el footer
-    document.getElementById('anioActual').textContent = new Date().getFullYear();
-
-    // Toggle mostrar / ocultar contraseña
-    function togglePassword() {
-      const input = document.getElementById('password');
-      const btn = document.getElementById('btnTogglePass');
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈';
-        btn.title = 'Ocultar contraseña';
-      } else {
-        input.type = 'password';
-        btn.textContent = '👁️';
-        btn.title = 'Mostrar contraseña';
-      }
-    }
 
     // Si ya hay sesión, redirigir
     sb.auth.getSession().then(({ data: { session } }) => {
