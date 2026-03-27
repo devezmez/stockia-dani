@@ -47,7 +47,7 @@ body {
 
 .app-layout {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   min-height: 100vh;
 }
 
@@ -668,3 +668,16 @@ body {
 .texto-centro { text-align: center; }
 .w-100 { width: 100%; }
 .oculto { display: none !important; }
+
+/* ============================================================
+   FOOTER COPYRIGHT
+   ============================================================ */
+
+.app-footer {
+  text-align: center;
+  padding: 20px 24px;
+  font-size: 12px;
+  color: #9CA3AF;
+  border-top: 1px solid var(--borde);
+  background: var(--fondo-card);
+}
