@@ -33,7 +33,25 @@
       </div>
       <button class="btn-salir" onclick="cerrarSesion()">🚪 Salir</button>
     </div>
-  </header>
+      <!-- Hamburguesa móvil -->
+      <button class="nav-hamburguesa" id="navHamburguesa" onclick="toggleMenu()" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- Menú móvil desplegable -->
+    <nav class="nav-menu-movil" id="navMenuMovil">
+      <div class="usuario-info" id="menuUsuarioInfo">Cargando...</div>
+      <div class="separador"></div>
+      <a href="dashboard.html" class="nav-link"><span class="icono">🏠</span> Inicio</a>
+      <a href="productos.html" class="nav-link"><span class="icono">📦</span> Productos</a>
+      <a href="clientes.html" class="nav-link"><span class="icono">👥</span> Clientes</a>
+      <a href="ventas.html" class="nav-link"><span class="icono">💰</span> Ventas</a>
+      <a href="admin.html" class="nav-link nav-admin-movil" style="display:none"><span class="icono">⚙️</span> Admin</a>
+      <div class="separador"></div>
+      <button onclick="cerrarSesion()"><span class="icono">🚪</span> Salir</button>
+    </nav>
+    <div class="nav-overlay" id="navOverlay" onclick="cerrarMenu()"></div>
 
   <main class="main-content">
 
@@ -193,12 +211,51 @@
   let modoEdicion = false;
   let todosProductos = [];
 
-  async function init() {
+
+    // ---- MENÚ HAMBURGUESA MÓVIL ----
+    function toggleMenu() {
+      const btn = document.getElementById('navHamburguesa');
+      const menu = document.getElementById('navMenuMovil');
+      const overlay = document.getElementById('navOverlay');
+      const abierto = menu.classList.contains('abierto');
+      if (abierto) {
+        cerrarMenu();
+      } else {
+        btn.classList.add('abierto');
+        menu.classList.add('abierto');
+        overlay.classList.add('abierto');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    function cerrarMenu() {
+      document.getElementById('navHamburguesa').classList.remove('abierto');
+      document.getElementById('navMenuMovil').classList.remove('abierto');
+      document.getElementById('navOverlay').classList.remove('abierto');
+      document.body.style.overflow = '';
+    }
+    // Cerrar menú al navegar
+    document.querySelectorAll('#navMenuMovil a').forEach(a => a.addEventListener('click', cerrarMenu));
+    // Marcar link activo en menú móvil
+    (function() {
+      const pagina = window.location.pathname.split('/').pop();
+      document.querySelectorAll('#navMenuMovil a.nav-link').forEach(a => {
+        if (a.getAttribute('href') === pagina) a.classList.add('activo');
+      });
+    })();
+
+      async function init() {
     const resultado = await verificarSesion();
     if (!resultado) return;
     perfilActual = resultado.perfil;
 
     document.getElementById('navNombre').textContent = perfilActual.nombre;
+      // Actualizar menú móvil
+      const menuInfo = document.getElementById('menuUsuarioInfo');
+      if (menuInfo) menuInfo.textContent = perfilActual.nombre + ' · ' + (perfilActual.rol === 'admin' ? '⭐ Admin' : '👤 Operador');
+      // Mostrar Admin en menú móvil si es admin
+      if (perfilActual.rol === 'admin') {
+        document.querySelectorAll('.nav-admin-movil').forEach(el => el.style.display = 'flex');
+      }
     document.getElementById('navRol').textContent = perfilActual.rol === 'admin' ? '⭐ Administrador' : '👤 Operador';
     if (perfilActual.rol === 'admin') document.getElementById('navAdmin').style.display = 'flex';
     marcarNavActivo();

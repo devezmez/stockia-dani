@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stockia — Administración</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/global.css?v=1.1">
   <style>
     .admin-grid {
       display: grid;
@@ -140,7 +140,25 @@
       </div>
       <button class="btn-salir" onclick="cerrarSesion()">🚪 Salir</button>
     </div>
-  </header>
+      <!-- Hamburguesa móvil -->
+      <button class="nav-hamburguesa" id="navHamburguesa" onclick="toggleMenu()" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- Menú móvil desplegable -->
+    <nav class="nav-menu-movil" id="navMenuMovil">
+      <div class="usuario-info" id="menuUsuarioInfo">Cargando...</div>
+      <div class="separador"></div>
+      <a href="dashboard.html" class="nav-link"><span class="icono">🏠</span> Inicio</a>
+      <a href="productos.html" class="nav-link"><span class="icono">📦</span> Productos</a>
+      <a href="clientes.html" class="nav-link"><span class="icono">👥</span> Clientes</a>
+      <a href="ventas.html" class="nav-link"><span class="icono">💰</span> Ventas</a>
+      <a href="admin.html" class="nav-link nav-admin-movil" style="display:none"><span class="icono">⚙️</span> Admin</a>
+      <div class="separador"></div>
+      <button onclick="cerrarSesion()"><span class="icono">🚪</span> Salir</button>
+    </nav>
+    <div class="nav-overlay" id="navOverlay" onclick="cerrarMenu()"></div>
 
   <!-- CONTENIDO -->
   <main class="main-content">
@@ -279,7 +297,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/global.js"></script>
+<script src="js/global.js?v=1.1"></script>
 <script>
 let perfilActual = null;
 let datosImportacion = null;
@@ -294,6 +312,13 @@ async function init() {
   perfilActual = resultado.perfil;
 
   document.getElementById('navNombre').textContent = perfilActual.nombre;
+      // Actualizar menú móvil
+      const menuInfo = document.getElementById('menuUsuarioInfo');
+      if (menuInfo) menuInfo.textContent = perfilActual.nombre + ' · ' + (perfilActual.rol === 'admin' ? '⭐ Admin' : '👤 Operador');
+      // Mostrar Admin en menú móvil si es admin
+      if (perfilActual.rol === 'admin') {
+        document.querySelectorAll('.nav-admin-movil').forEach(el => el.style.display = 'flex');
+      }
   document.getElementById('navRol').textContent = '⭐ Administrador';
   marcarNavActivo();
 
