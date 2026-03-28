@@ -69,6 +69,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  min-width: 0;    /* evita que flex desborde */
+  width: 100%;
 }
 
 .nav-logo {
@@ -78,7 +80,8 @@ body {
   text-decoration: none;
 }
 
-.nav-logo svg { width: 120px; height: 36px; }
+.nav-logo svg,
+.nav-logo-svg { width: 120px; height: 36px; flex-shrink: 0; }
 
 .nav-links {
   display: flex;
@@ -635,16 +638,23 @@ body {
    HAMBURGUESA + MENÚ MÓVIL
    ============================================================ */
 
+/* Siempre oculto en escritorio */
 .nav-hamburguesa {
   display: none;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px 6px;
+  padding: 8px;
   border-radius: 6px;
   transition: background 0.15s;
-  line-height: 0;
+  line-height: 1;
   flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
 }
 .nav-hamburguesa:hover { background: rgba(255,255,255,0.15); }
 .nav-hamburguesa .bar {
@@ -653,7 +663,6 @@ body {
   height: 2px;
   background: white;
   border-radius: 2px;
-  margin: 5px 0;
   transition: all 0.25s ease;
   transform-origin: center;
 }
@@ -669,13 +678,8 @@ body {
   z-index: 200;
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   border-top: 1px solid rgba(255,255,255,0.12);
-  animation: slideDown 0.18s ease;
 }
 .nav-menu-movil.abierto { display: block; }
-@keyframes slideDown {
-  from { opacity:0; transform:translateY(-6px); }
-  to   { opacity:1; transform:translateY(0); }
-}
 .nav-menu-movil a,
 .nav-menu-movil button {
   display: flex; align-items: center; gap: 14px;
@@ -691,8 +695,8 @@ body {
 }
 .nav-menu-movil a:hover,
 .nav-menu-movil button:hover { background: rgba(255,255,255,0.1); color:#fff; }
-.nav-menu-movil a.activo { background: rgba(255,255,255,0.16); color:#fff; font-weight:700; }
-.nav-menu-movil .icono { font-size:19px; width:26px; text-align:center; flex-shrink:0; }
+.nav-menu-movil a.activo     { background: rgba(255,255,255,0.16); color:#fff; font-weight:700; }
+.nav-menu-movil .icono       { font-size:19px; width:26px; text-align:center; flex-shrink:0; }
 .nav-menu-movil .usuario-info {
   padding: 13px 20px 9px;
   font-size: 11px; font-weight:700;
@@ -717,104 +721,128 @@ body {
 }
 
 /* ============================================================
-   RESPONSIVE ≤ 900px
+   RESPONSIVE — DESKTOP: menú normal visible (> 900px)
+   ============================================================ */
+@media (min-width: 901px) {
+  .nav-hamburguesa  { display: none !important; }
+  .nav-links        { display: flex !important; }
+  .nav-usuario      { display: flex !important; }
+  .nav-menu-movil   { display: none !important; }
+  .nav-overlay      { display: none !important; }
+  .stats-grid       { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET/MÓVIL (≤ 900px)
+   Aquí vive TODO el responsive móvil.
    ============================================================ */
 @media (max-width: 900px) {
-  .stats-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
-}
 
-/* ============================================================
-   RESPONSIVE ≤ 768px — MÓVIL
-   ============================================================ */
-@media (max-width: 768px) {
+  /* === NAV === */
+  .nav-header {
+    padding: 0 14px;
+    height: 56px;
+  }
+  .nav-links        { display: none !important; }
+  .nav-usuario      { display: none !important; }
+  .nav-hamburguesa  {
+    display: flex !important;   /* flex para centrar las barras */
+  }
+  .nav-logo-svg,
+  .nav-logo svg { width: 110px; height: 30px; }
 
-  /* NAV */
-  .nav-header      { padding: 0 14px; height: 56px; }
-  .nav-links       { display: none !important; }
-  .nav-usuario     { display: none !important; }
-  .nav-hamburguesa { display: block !important; }
+  /* === LAYOUT === */
+  *, *::before, *::after { box-sizing: border-box; }
+  html  { overflow-x: hidden; }
+  body  { overflow-x: hidden; max-width: 100vw; }
+  .app-layout   { overflow-x: hidden; width: 100%; }
+  .main-content { padding: 14px 12px; width: 100%; max-width: 100%; }
 
-  /* LAYOUT — contener todo dentro del viewport */
-  html, body       { overflow-x: hidden; width: 100%; }
-  .app-layout      { overflow-x: hidden; width: 100%; }
-  .main-content    { padding: 12px 10px; width: 100%; box-sizing: border-box; }
+  /* === PAGE HEADER === */
+  .page-header    { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
+  .page-titulo    { font-size: 18px; }
+  .page-subtitulo { font-size: 13px; }
+  .btn-lg         { width: 100% !important; justify-content: center !important; padding: 13px !important; font-size: 15px !important; }
 
-  /* PAGE HEADER */
-  .page-header     { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px; }
-  .page-titulo     { font-size: 16px; }
-  .page-subtitulo  { font-size: 12px; }
-  .btn-lg          { width: 100% !important; justify-content: center; padding: 12px; font-size: 14px; box-sizing: border-box; }
+  /* === STATS: 2 columnas === */
+  .stats-grid  { grid-template-columns: 1fr 1fr !important; gap: 10px; margin-bottom: 14px; }
+  .stat-card   { padding: 12px 10px; gap: 10px; min-width: 0; overflow: hidden; }
+  .stat-icono  { width: 36px; height: 36px; font-size: 18px; flex-shrink: 0; }
+  .stat-info   { min-width: 0; flex: 1; overflow: hidden; }
+  .stat-valor  { font-size: 18px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .stat-label  { font-size: 11px; }
 
-  /* STATS */
-  .stats-grid      { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; width: 100%; }
-  .stat-card       { padding: 10px 8px; gap: 8px; border-radius: 10px; min-width: 0; overflow: hidden; }
-  .stat-icono      { width: 30px; height: 30px; font-size: 15px; border-radius: 7px; flex-shrink: 0; }
-  .stat-info       { min-width: 0; flex: 1; overflow: hidden; }
-  .stat-valor      { font-size: 15px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .stat-label      { font-size: 10px; margin-top: 1px; line-height: 1.2; }
+  /* === CARDS === */
+  .card        { padding: 14px 12px; }
+  .card-titulo { font-size: 15px; margin-bottom: 12px; }
+  .mb-24       { margin-bottom: 12px; }
 
-  /* CARDS */
-  .card            { padding: 12px 10px; border-radius: 10px; width: 100%; box-sizing: border-box; }
-  .card-titulo     { font-size: 13px; margin-bottom: 10px; }
-  .mb-24           { margin-bottom: 10px; }
+  /* === BUSCADORES DASHBOARD === */
+  .buscadores-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
 
-  /* DASHBOARD buscadores */
-  .buscadores-grid { grid-template-columns: 1fr !important; gap: 10px; margin-bottom: 12px; }
-
-  /* FORMULARIOS */
-  .form-fila       { grid-template-columns: 1fr; }
-  .form-grupo      { margin-bottom: 10px; }
-  .form-label      { font-size: 13px; margin-bottom: 4px; }
+  /* === FORMULARIOS === */
+  .form-fila    { grid-template-columns: 1fr; gap: 0; }
+  .form-grupo   { margin-bottom: 12px; }
+  .form-label   { font-size: 14px; margin-bottom: 6px; }
   .form-input,
   .form-select,
-  .form-textarea   { font-size: 16px; padding: 10px 11px; width: 100%; box-sizing: border-box; }
-  .form-textarea   { min-height: 70px; }
-  .buscador-input  { font-size: 16px; padding: 10px 10px 10px 36px; width: 100%; box-sizing: border-box; }
-  .buscador-icono  { font-size: 15px; left: 10px; }
+  .form-textarea { font-size: 16px; padding: 11px 13px; width: 100%; }
+  .buscador-input { font-size: 16px; padding: 12px 12px 12px 42px; }
 
-  /* BOTONES */
-  .btn             { font-size: 13px; padding: 9px 12px; }
-  .btn-sm          { font-size: 11px; padding: 6px 8px; }
+  /* === BOTONES === */
+  .btn    { font-size: 14px; padding: 10px 14px; }
+  .btn-sm { font-size: 12px; padding: 7px 10px; }
 
-  /* TABLAS */
-  .tabla-contenedor { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; width: 100%; }
-  .tabla            { font-size: 12px; min-width: 460px; }
-  .tabla th         { padding: 8px 6px; font-size: 10px; white-space: nowrap; }
-  .tabla td         { padding: 9px 6px; }
-  .tabla-acciones   { gap: 3px; flex-wrap: nowrap; }
-  .tabla-acciones .btn { padding: 5px 6px; font-size: 11px; }
+  /* === TABLAS === */
+  .tabla-contenedor { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tabla    { font-size: 12px; min-width: 480px; }
+  .tabla th { padding: 9px 8px; font-size: 10px; white-space: nowrap; }
+  .tabla td { padding: 10px 8px; }
+  .tabla-acciones     { gap: 4px; flex-wrap: nowrap; }
+  .tabla-acciones .btn { padding: 5px 7px; font-size: 11px; }
 
-  /* MODALES */
-  .modal-overlay   { padding: 0; align-items: flex-end; }
-  .modal           { border-radius: 16px 16px 0 0; max-height: 88vh; padding: 18px 12px 24px; width: 100%; max-width: 100%; box-sizing: border-box; }
-  .modal-titulo    { font-size: 15px; }
-  .modal-footer    { flex-direction: column-reverse; gap: 7px; padding-top: 12px; }
+  /* === MODALES === */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    border-radius: 16px 16px 0 0;
+    max-height: 88vh;
+    padding: 20px 14px 28px;
+    width: 100%; max-width: 100%;
+  }
+  .modal-titulo  { font-size: 16px; }
+  .modal-footer  { flex-direction: column-reverse; gap: 8px; padding-top: 14px; }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
-  /* BADGES */
-  .badge           { font-size: 10px; padding: 2px 5px; }
+  /* === BADGES === */
+  .badge { font-size: 11px; padding: 3px 7px; }
 
-  /* ESTADO VACÍO */
-  .estado-vacio        { padding: 28px 10px; }
-  .estado-vacio-icono  { font-size: 38px; }
-  .estado-vacio-titulo { font-size: 14px; }
-  .estado-vacio-desc   { font-size: 12px; }
+  /* === ESTADO VACÍO === */
+  .estado-vacio       { padding: 32px 12px; }
+  .estado-vacio-icono { font-size: 42px; }
 
-  /* FOOTER */
-  .app-footer { padding: 10px; font-size: 11px; }
+  /* === FOOTER === */
+  .app-footer { padding: 12px; font-size: 11px; }
 }
 
-/* ============================================================
-   RESPONSIVE ≤ 400px — MÓVIL MUY PEQUEÑO
-   ============================================================ */
-@media (max-width: 400px) {
-  .main-content   { padding: 10px 8px; }
-  .stats-grid     { gap: 6px; }
-  .stat-card      { padding: 8px 7px; gap: 6px; }
-  .stat-valor     { font-size: 14px; }
-  .stat-icono     { width: 26px; height: 26px; font-size: 13px; }
-  .card           { padding: 10px 8px; }
-  .page-titulo    { font-size: 14px; }
+/* ≤ 480px: compactar más */
+@media (max-width: 480px) {
+  .main-content { padding: 10px 8px; }
+  .stats-grid   { gap: 8px; }
+  .stat-card    { padding: 10px 8px; gap: 8px; }
+  .stat-valor   { font-size: 16px; }
+  .stat-icono   { width: 30px; height: 30px; font-size: 15px; }
+  .page-titulo  { font-size: 16px; }
+  .card         { padding: 12px 10px; }
+}
+
+/* ≤ 360px: mínimo absoluto */
+@media (max-width: 360px) {
+  .main-content { padding: 8px 6px; }
+  .stats-grid   { gap: 6px; }
+  .stat-card    { padding: 8px 6px; gap: 6px; }
+  .stat-valor   { font-size: 15px; }
+  .stat-icono   { width: 26px; height: 26px; font-size: 13px; }
+  .nav-header   { padding: 0 10px; }
 }
 
 /* ============================================================
