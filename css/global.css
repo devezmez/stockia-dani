@@ -69,8 +69,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  min-width: 0;    /* evita que flex desborde */
   width: 100%;
+  box-sizing: border-box;
 }
 
 .nav-logo {
@@ -81,7 +81,12 @@ body {
 }
 
 .nav-logo svg,
-.nav-logo-svg { width: 120px; height: 36px; flex-shrink: 0; }
+.nav-logo-svg {
+  width: 110px !important;   /* !important sobreescribe atributo HTML width= */
+  height: auto !important;
+  flex-shrink: 0;
+  display: block;
+}
 
 .nav-links {
   display: flex;
@@ -634,42 +639,33 @@ body {
    RESPONSIVE
    ============================================================ */
 
-/* ============================================================
-   HAMBURGUESA + MENÚ MÓVIL
-   ============================================================ */
-
-/* Siempre oculto en escritorio */
+/* ─── HAMBURGUESA ─────────────────────────────────────────── */
 .nav-hamburguesa {
-  display: none;
+  /* oculto por defecto — se activa en móvil */
+  display: none !important;
   background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
-  transition: background 0.15s;
   line-height: 1;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 5px;
 }
-.nav-hamburguesa:hover { background: rgba(255,255,255,0.15); }
 .nav-hamburguesa .bar {
   display: block;
   width: 22px;
   height: 2px;
   background: white;
   border-radius: 2px;
+  margin: 5px 0;
   transition: all 0.25s ease;
   transform-origin: center;
 }
-.nav-hamburguesa.abierto .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburguesa.abierto .bar:nth-child(1) { transform: translateY(7px)  rotate(45deg); }
 .nav-hamburguesa.abierto .bar:nth-child(2) { opacity: 0; }
 .nav-hamburguesa.abierto .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+/* ─── MENÚ DESPLEGABLE MÓVIL ────────────────────────────── */
 .nav-menu-movil {
   display: none;
   position: fixed;
@@ -688,31 +684,31 @@ body {
   text-decoration: none;
   font-size: 16px; font-weight: 500;
   font-family: 'Inter', sans-serif;
-  background: none; border: none; width: 100%;
-  text-align: left; cursor: pointer;
+  background: none; border: none;
+  width: 100%; text-align: left; cursor: pointer;
   transition: background 0.12s;
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 .nav-menu-movil a:hover,
-.nav-menu-movil button:hover { background: rgba(255,255,255,0.1); color:#fff; }
-.nav-menu-movil a.activo     { background: rgba(255,255,255,0.16); color:#fff; font-weight:700; }
-.nav-menu-movil .icono       { font-size:19px; width:26px; text-align:center; flex-shrink:0; }
+.nav-menu-movil button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.nav-menu-movil a.activo     { background: rgba(255,255,255,0.16); color: #fff; font-weight: 700; }
+.nav-menu-movil .icono       { font-size: 19px; width: 26px; text-align: center; flex-shrink: 0; }
 .nav-menu-movil .usuario-info {
-  padding: 13px 20px 9px;
-  font-size: 11px; font-weight:700;
+  padding: 12px 20px 8px;
+  font-size: 11px; font-weight: 700;
   color: rgba(255,255,255,0.45);
   text-transform: uppercase; letter-spacing: 0.6px;
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 .nav-overlay {
   display: none;
-  position: fixed; inset:0; top:56px;
+  position: fixed; inset: 0; top: 56px;
   background: rgba(0,0,0,0.45);
   z-index: 199;
 }
 .nav-overlay.abierto { display: block; }
 
-/* Buscadores dashboard */
+/* ─── BUSCADORES DASHBOARD ───────────────────────────────── */
 .buscadores-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -721,128 +717,123 @@ body {
 }
 
 /* ============================================================
-   RESPONSIVE — DESKTOP: menú normal visible (> 900px)
+   DESKTOP (> 900px): menú normal
    ============================================================ */
 @media (min-width: 901px) {
-  .nav-hamburguesa  { display: none !important; }
+  .nav-hamburguesa { display: none !important; }
   .nav-links        { display: flex !important; }
   .nav-usuario      { display: flex !important; }
-  .nav-menu-movil   { display: none !important; }
-  .nav-overlay      { display: none !important; }
   .stats-grid       { grid-template-columns: repeat(4, 1fr); }
 }
 
 /* ============================================================
-   RESPONSIVE — TABLET/MÓVIL (≤ 900px)
-   Aquí vive TODO el responsive móvil.
+   MÓVIL + TABLET (≤ 900px): hamburguesa y layout adaptado
    ============================================================ */
 @media (max-width: 900px) {
 
-  /* === NAV === */
+  /* ── NAV ── */
   .nav-header {
-    padding: 0 14px;
-    height: 56px;
+    padding: 0 12px;
+    height: 54px;
   }
   .nav-links        { display: none !important; }
   .nav-usuario      { display: none !important; }
-  .nav-hamburguesa  {
-    display: flex !important;   /* flex para centrar las barras */
-  }
+  .nav-hamburguesa  { display: flex !important; }  /* flex para alinear las barras */
+  .nav-hamburguesa  { flex-direction: column; align-items: center; justify-content: center; width: 40px; height: 40px; }
   .nav-logo-svg,
-  .nav-logo svg { width: 110px; height: 30px; }
+  .nav-logo svg     { width: 100px !important; height: auto !important; }
+  .nav-menu-movil   { top: 54px; }
+  .nav-overlay      { top: 54px; }
 
-  /* === LAYOUT === */
-  *, *::before, *::after { box-sizing: border-box; }
-  html  { overflow-x: hidden; }
-  body  { overflow-x: hidden; max-width: 100vw; }
-  .app-layout   { overflow-x: hidden; width: 100%; }
-  .main-content { padding: 14px 12px; width: 100%; max-width: 100%; }
+  /* ── LAYOUT ── */
+  *,
+  *::before,
+  *::after         { box-sizing: border-box; }
+  html             { overflow-x: hidden; }
+  body             { overflow-x: hidden; width: 100%; max-width: 100vw; }
+  .app-layout      { width: 100%; overflow-x: hidden; }
+  .main-content    { padding: 12px 10px; width: 100%; max-width: 100%; }
 
-  /* === PAGE HEADER === */
-  .page-header    { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
-  .page-titulo    { font-size: 18px; }
-  .page-subtitulo { font-size: 13px; }
-  .btn-lg         { width: 100% !important; justify-content: center !important; padding: 13px !important; font-size: 15px !important; }
+  /* ── PAGE HEADER ── */
+  .page-header     { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px; }
+  .page-titulo     { font-size: 17px; }
+  .page-subtitulo  { font-size: 12px; }
+  .btn-lg          { width: 100% !important; justify-content: center !important; padding: 12px !important; font-size: 15px !important; box-sizing: border-box; }
 
-  /* === STATS: 2 columnas === */
-  .stats-grid  { grid-template-columns: 1fr 1fr !important; gap: 10px; margin-bottom: 14px; }
-  .stat-card   { padding: 12px 10px; gap: 10px; min-width: 0; overflow: hidden; }
-  .stat-icono  { width: 36px; height: 36px; font-size: 18px; flex-shrink: 0; }
-  .stat-info   { min-width: 0; flex: 1; overflow: hidden; }
-  .stat-valor  { font-size: 18px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .stat-label  { font-size: 11px; }
+  /* ── STATS ── */
+  .stats-grid      { grid-template-columns: 1fr 1fr !important; gap: 10px; margin-bottom: 12px; width: 100%; }
+  .stat-card       { padding: 12px 10px; gap: 10px; min-width: 0; overflow: hidden; box-sizing: border-box; }
+  .stat-icono      { width: 34px; height: 34px; font-size: 17px; flex-shrink: 0; border-radius: 8px; }
+  .stat-info       { min-width: 0; flex: 1; overflow: hidden; }
+  .stat-valor      { font-size: 17px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .stat-label      { font-size: 11px; line-height: 1.2; }
 
-  /* === CARDS === */
-  .card        { padding: 14px 12px; }
-  .card-titulo { font-size: 15px; margin-bottom: 12px; }
-  .mb-24       { margin-bottom: 12px; }
+  /* ── CARDS ── */
+  .card            { padding: 14px 12px; box-sizing: border-box; }
+  .card-titulo     { font-size: 15px; margin-bottom: 10px; }
+  .mb-24           { margin-bottom: 12px; }
 
-  /* === BUSCADORES DASHBOARD === */
-  .buscadores-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+  /* ── BUSCADORES ── */
+  .buscadores-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
 
-  /* === FORMULARIOS === */
-  .form-fila    { grid-template-columns: 1fr; gap: 0; }
-  .form-grupo   { margin-bottom: 12px; }
-  .form-label   { font-size: 14px; margin-bottom: 6px; }
+  /* ── FORMULARIOS ── */
+  .form-fila       { grid-template-columns: 1fr; }
+  .form-grupo      { margin-bottom: 10px; }
+  .form-label      { font-size: 13px; margin-bottom: 5px; }
   .form-input,
   .form-select,
-  .form-textarea { font-size: 16px; padding: 11px 13px; width: 100%; }
-  .buscador-input { font-size: 16px; padding: 12px 12px 12px 42px; }
+  .form-textarea   { font-size: 16px; padding: 11px 12px; width: 100%; }
+  .buscador-input  { font-size: 16px; padding: 11px 11px 11px 40px; }
 
-  /* === BOTONES === */
-  .btn    { font-size: 14px; padding: 10px 14px; }
-  .btn-sm { font-size: 12px; padding: 7px 10px; }
+  /* ── BOTONES ── */
+  .btn    { font-size: 13px; padding: 9px 12px; }
+  .btn-sm { font-size: 11px; padding: 6px 8px; }
 
-  /* === TABLAS === */
-  .tabla-contenedor { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .tabla    { font-size: 12px; min-width: 480px; }
-  .tabla th { padding: 9px 8px; font-size: 10px; white-space: nowrap; }
-  .tabla td { padding: 10px 8px; }
-  .tabla-acciones     { gap: 4px; flex-wrap: nowrap; }
-  .tabla-acciones .btn { padding: 5px 7px; font-size: 11px; }
+  /* ── TABLAS ── */
+  .tabla-contenedor { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+  .tabla            { font-size: 12px; min-width: 460px; }
+  .tabla th         { padding: 8px 7px; font-size: 10px; white-space: nowrap; }
+  .tabla td         { padding: 9px 7px; }
+  .tabla-acciones   { gap: 3px; flex-wrap: nowrap; }
+  .tabla-acciones .btn { padding: 5px 6px; font-size: 11px; }
 
-  /* === MODALES === */
-  .modal-overlay { padding: 0; align-items: flex-end; }
-  .modal {
-    border-radius: 16px 16px 0 0;
-    max-height: 88vh;
-    padding: 20px 14px 28px;
-    width: 100%; max-width: 100%;
-  }
-  .modal-titulo  { font-size: 16px; }
-  .modal-footer  { flex-direction: column-reverse; gap: 8px; padding-top: 14px; }
+  /* ── MODALES ── */
+  .modal-overlay   { padding: 0; align-items: flex-end; }
+  .modal           { border-radius: 16px 16px 0 0; max-height: 88vh; padding: 18px 12px 24px; width: 100%; max-width: 100%; box-sizing: border-box; }
+  .modal-titulo    { font-size: 15px; }
+  .modal-footer    { flex-direction: column-reverse; gap: 7px; padding-top: 12px; }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
-  /* === BADGES === */
-  .badge { font-size: 11px; padding: 3px 7px; }
+  /* ── BADGES ── */
+  .badge { font-size: 10px; padding: 2px 6px; }
 
-  /* === ESTADO VACÍO === */
-  .estado-vacio       { padding: 32px 12px; }
-  .estado-vacio-icono { font-size: 42px; }
+  /* ── ESTADO VACÍO ── */
+  .estado-vacio       { padding: 28px 10px; }
+  .estado-vacio-icono { font-size: 38px; }
 
-  /* === FOOTER === */
-  .app-footer { padding: 12px; font-size: 11px; }
+  /* ── FOOTER ── */
+  .app-footer { padding: 10px; font-size: 11px; }
 }
 
-/* ≤ 480px: compactar más */
+/* ── 480px: stats en 1 columna para pantallas muy angostas ── */
 @media (max-width: 480px) {
+  .stats-grid   { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+  .stat-card    { padding: 10px 8px; }
+  .stat-valor   { font-size: 15px; }
+  .stat-icono   { width: 30px; height: 30px; font-size: 14px; }
   .main-content { padding: 10px 8px; }
-  .stats-grid   { gap: 8px; }
-  .stat-card    { padding: 10px 8px; gap: 8px; }
-  .stat-valor   { font-size: 16px; }
-  .stat-icono   { width: 30px; height: 30px; font-size: 15px; }
-  .page-titulo  { font-size: 16px; }
-  .card         { padding: 12px 10px; }
 }
 
-/* ≤ 360px: mínimo absoluto */
+/* ── 360px: mínimo absoluto ── */
 @media (max-width: 360px) {
+  .nav-header   { padding: 0 8px; }
   .main-content { padding: 8px 6px; }
   .stats-grid   { gap: 6px; }
   .stat-card    { padding: 8px 6px; gap: 6px; }
-  .stat-valor   { font-size: 15px; }
+  .stat-valor   { font-size: 14px; }
   .stat-icono   { width: 26px; height: 26px; font-size: 13px; }
-  .nav-header   { padding: 0 10px; }
+  .card         { padding: 10px 8px; }
+  .page-titulo  { font-size: 15px; }
 }
 
 /* ============================================================
