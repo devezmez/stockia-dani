@@ -817,6 +817,24 @@ body {
 }
 
 /* Pantallas muy pequeñas < 380px */
+/* Refuerzo explícito para móviles 360-500px por si el breakpoint 768 no aplica */
+@media only screen and (max-width: 500px) {
+  .nav-links    { display: none !important; }
+  .nav-usuario  { display: none !important; }
+  .nav-hamburguesa { display: block !important; }
+  .nav-header   { padding: 0 12px; height: 56px; }
+  .nav-menu-movil { top: 56px; }
+  .nav-overlay    { top: 56px; }
+  .main-content { padding: 10px 8px; max-width: 100%; }
+  .stats-grid   { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .stat-card    { padding: 9px 8px; gap: 6px; }
+  .stat-valor   { font-size: 15px; }
+  .stat-icono   { width: 30px; height: 30px; font-size: 15px; }
+  .card         { padding: 10px 9px; }
+  .page-titulo  { font-size: 15px; }
+  .btn-lg       { width: 100%; font-size: 14px; padding: 12px; }
+}
+
 @media (max-width: 380px) {
   .main-content { padding: 10px 8px; }
   .stats-grid   { gap: 6px; }
