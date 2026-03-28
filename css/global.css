@@ -635,7 +635,6 @@ body {
    HAMBURGUESA + MENÚ MÓVIL
    ============================================================ */
 
-/* Oculto en PC, visible solo en móvil via media query */
 .nav-hamburguesa {
   display: none;
   background: none;
@@ -662,11 +661,10 @@ body {
 .nav-hamburguesa.abierto .bar:nth-child(2) { opacity: 0; }
 .nav-hamburguesa.abierto .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* Menú desplegable — oculto siempre hasta .abierto */
 .nav-menu-movil {
   display: none;
   position: fixed;
-  top: 60px; left: 0; right: 0;
+  top: 56px; left: 0; right: 0;
   background: var(--primario);
   z-index: 200;
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
@@ -691,158 +689,132 @@ body {
   transition: background 0.12s;
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
-.nav-menu-movil a:last-child,
-.nav-menu-movil button:last-child { border-bottom: none; }
 .nav-menu-movil a:hover,
-.nav-menu-movil button:hover  { background: rgba(255,255,255,0.1); color:#fff; }
-.nav-menu-movil a.activo       { background: rgba(255,255,255,0.16); color:#fff; font-weight:700; }
-.nav-menu-movil .icono         { font-size:19px; width:26px; text-align:center; flex-shrink:0; }
-.nav-menu-movil .usuario-info  {
+.nav-menu-movil button:hover { background: rgba(255,255,255,0.1); color:#fff; }
+.nav-menu-movil a.activo { background: rgba(255,255,255,0.16); color:#fff; font-weight:700; }
+.nav-menu-movil .icono { font-size:19px; width:26px; text-align:center; flex-shrink:0; }
+.nav-menu-movil .usuario-info {
   padding: 13px 20px 9px;
   font-size: 11px; font-weight:700;
   color: rgba(255,255,255,0.45);
   text-transform: uppercase; letter-spacing: 0.6px;
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
-/* Overlay oscuro detrás del menú */
 .nav-overlay {
   display: none;
-  position: fixed; inset:0; top:60px;
+  position: fixed; inset:0; top:56px;
   background: rgba(0,0,0,0.45);
   z-index: 199;
 }
 .nav-overlay.abierto { display: block; }
 
-/* ============================================================
-   RESPONSIVE — se aplica en TODOS los anchos menores a 900px
-   PC (> 900px) no es afectado en absoluto
-   ============================================================ */
+/* Buscadores dashboard */
+.buscadores-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
 
-/* Tablets anchas: stats en 2 columnas */
+/* ============================================================
+   RESPONSIVE ≤ 900px
+   ============================================================ */
 @media (max-width: 900px) {
   .stats-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
 }
 
-/* Móvil y tablet angosta: breakpoint principal */
+/* ============================================================
+   RESPONSIVE ≤ 768px — MÓVIL
+   ============================================================ */
 @media (max-width: 768px) {
 
-  /* NAV ---------------------------------------------------- */
-  .nav-header   { padding: 0 14px; height: 56px; }
-  .nav-links    { display: none !important; }
-  .nav-usuario  { display: none !important; }
-  .nav-hamburguesa { display: block; }
+  /* NAV */
+  .nav-header      { padding: 0 14px; height: 56px; }
+  .nav-links       { display: none !important; }
+  .nav-usuario     { display: none !important; }
+  .nav-hamburguesa { display: block !important; }
 
-  /* el menú desplegable se ancla al alto del nav */
-  .nav-menu-movil { top: 56px; }
-  .nav-overlay    { top: 56px; }
+  /* LAYOUT — contener todo dentro del viewport */
+  html, body       { overflow-x: hidden; width: 100%; }
+  .app-layout      { overflow-x: hidden; width: 100%; }
+  .main-content    { padding: 12px 10px; width: 100%; box-sizing: border-box; }
 
-  /* LAYOUT ------------------------------------------------- */
-  .app-layout   { min-height: 100vh; }
-  .main-content { padding: 12px 10px; max-width: 100%; }
+  /* PAGE HEADER */
+  .page-header     { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px; }
+  .page-titulo     { font-size: 16px; }
+  .page-subtitulo  { font-size: 12px; }
+  .btn-lg          { width: 100% !important; justify-content: center; padding: 12px; font-size: 14px; box-sizing: border-box; }
 
-  /* PAGE HEADER -------------------------------------------- */
-  .page-header    { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px; }
-  .page-titulo    { font-size: 16px; gap: 6px; }
-  .page-subtitulo { font-size: 12px; }
-  .btn-lg         { width: 100%; justify-content: center; padding: 12px 14px; font-size: 14px; }
+  /* STATS */
+  .stats-grid      { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; width: 100%; }
+  .stat-card       { padding: 10px 8px; gap: 8px; border-radius: 10px; min-width: 0; overflow: hidden; }
+  .stat-icono      { width: 30px; height: 30px; font-size: 15px; border-radius: 7px; flex-shrink: 0; }
+  .stat-info       { min-width: 0; flex: 1; overflow: hidden; }
+  .stat-valor      { font-size: 15px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-label      { font-size: 10px; margin-top: 1px; line-height: 1.2; }
 
-  /* STATS -------------------------------------------------- */
-  .stats-grid  { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .stat-card   { padding: 11px 10px; gap: 8px; border-radius: 10px; overflow: hidden; }
-  .stat-icono  { width: 32px; height: 32px; font-size: 16px; border-radius: 8px; flex-shrink: 0; }
-  .stat-info   { min-width: 0; }  /* evita que el texto desborde */
-  .stat-valor  { font-size: 16px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .stat-label  { font-size: 10px; margin-top: 1px; line-height: 1.2; white-space: normal; }
+  /* CARDS */
+  .card            { padding: 12px 10px; border-radius: 10px; width: 100%; box-sizing: border-box; }
+  .card-titulo     { font-size: 13px; margin-bottom: 10px; }
+  .mb-24           { margin-bottom: 10px; }
 
-  /* CARDS -------------------------------------------------- */
-  .card        { padding: 12px 10px; border-radius: 10px; }
-  .card-titulo { font-size: 13px; margin-bottom: 10px; gap: 5px; }
-  .card-titulo .icono { font-size: 17px; }
-  .mb-24       { margin-bottom: 10px; }
+  /* DASHBOARD buscadores */
+  .buscadores-grid { grid-template-columns: 1fr !important; gap: 10px; margin-bottom: 12px; }
 
-  /* FORMULARIOS — 16px evita zoom automático en iOS -------- */
-  .form-fila     { grid-template-columns: 1fr; }
-  .form-grupo    { margin-bottom: 10px; }
-  .form-label    { font-size: 13px; margin-bottom: 4px; }
+  /* FORMULARIOS */
+  .form-fila       { grid-template-columns: 1fr; }
+  .form-grupo      { margin-bottom: 10px; }
+  .form-label      { font-size: 13px; margin-bottom: 4px; }
   .form-input,
   .form-select,
-  .form-textarea { font-size: 16px; padding: 10px 11px; }
-  .form-textarea { min-height: 70px; }
-  .buscador-input { font-size: 16px; padding: 10px 10px 10px 36px; }
-  .buscador-icono { font-size: 15px; left: 10px; }
+  .form-textarea   { font-size: 16px; padding: 10px 11px; width: 100%; box-sizing: border-box; }
+  .form-textarea   { min-height: 70px; }
+  .buscador-input  { font-size: 16px; padding: 10px 10px 10px 36px; width: 100%; box-sizing: border-box; }
+  .buscador-icono  { font-size: 15px; left: 10px; }
 
-  /* BOTONES ------------------------------------------------ */
-  .btn    { font-size: 13px; padding: 9px 13px; }
-  .btn-sm { font-size: 11px; padding: 6px 9px; }
-  .btn-lg { font-size: 14px; padding: 12px 14px; }
+  /* BOTONES */
+  .btn             { font-size: 13px; padding: 9px 12px; }
+  .btn-sm          { font-size: 11px; padding: 6px 8px; }
 
-  /* TABLAS — scroll horizontal obligatorio ----------------- */
-  .tabla-contenedor {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
-  }
-  .tabla        { font-size: 12px; min-width: 480px; }
-  .tabla th     { padding: 8px 7px; font-size: 10px; white-space: nowrap; }
-  .tabla td     { padding: 9px 7px; }
-  .tabla-acciones     { gap: 3px; flex-wrap: nowrap; }
+  /* TABLAS */
+  .tabla-contenedor { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; width: 100%; }
+  .tabla            { font-size: 12px; min-width: 460px; }
+  .tabla th         { padding: 8px 6px; font-size: 10px; white-space: nowrap; }
+  .tabla td         { padding: 9px 6px; }
+  .tabla-acciones   { gap: 3px; flex-wrap: nowrap; }
   .tabla-acciones .btn { padding: 5px 6px; font-size: 11px; }
 
-  /* MODALES — suben desde abajo ---------------------------- */
-  .modal-overlay { padding: 0; align-items: flex-end; }
-  .modal {
-    border-radius: 16px 16px 0 0;
-    max-height: 88vh;
-    padding: 18px 12px 24px;
-    width: 100%; max-width: 100%;
-  }
-  .modal-titulo  { font-size: 15px; }
-  .modal-footer  { flex-direction: column-reverse; gap: 7px; padding-top: 12px; }
+  /* MODALES */
+  .modal-overlay   { padding: 0; align-items: flex-end; }
+  .modal           { border-radius: 16px 16px 0 0; max-height: 88vh; padding: 18px 12px 24px; width: 100%; max-width: 100%; box-sizing: border-box; }
+  .modal-titulo    { font-size: 15px; }
+  .modal-footer    { flex-direction: column-reverse; gap: 7px; padding-top: 12px; }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
-  /* BADGES ------------------------------------------------- */
-  .badge { font-size: 10px; padding: 2px 5px; }
+  /* BADGES */
+  .badge           { font-size: 10px; padding: 2px 5px; }
 
-  /* ESTADO VACÍO ------------------------------------------- */
+  /* ESTADO VACÍO */
   .estado-vacio        { padding: 28px 10px; }
   .estado-vacio-icono  { font-size: 38px; }
   .estado-vacio-titulo { font-size: 14px; }
   .estado-vacio-desc   { font-size: 12px; }
 
-  /* DASHBOARD buscadores ----------------------------------- */
-  #buscadoresGrid { grid-template-columns: 1fr !important; gap: 8px !important; }
-
-  /* FOOTER ------------------------------------------------- */
+  /* FOOTER */
   .app-footer { padding: 10px; font-size: 11px; }
 }
 
-/* Pantallas muy pequeñas < 380px */
-/* Refuerzo explícito para móviles 360-500px por si el breakpoint 768 no aplica */
-@media only screen and (max-width: 500px) {
-  .nav-links    { display: none !important; }
-  .nav-usuario  { display: none !important; }
-  .nav-hamburguesa { display: block !important; }
-  .nav-header   { padding: 0 12px; height: 56px; }
-  .nav-menu-movil { top: 56px; }
-  .nav-overlay    { top: 56px; }
-  .main-content { padding: 10px 8px; max-width: 100%; }
-  .stats-grid   { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .stat-card    { padding: 9px 8px; gap: 6px; }
-  .stat-valor   { font-size: 15px; }
-  .stat-icono   { width: 30px; height: 30px; font-size: 15px; }
-  .card         { padding: 10px 9px; }
-  .page-titulo  { font-size: 15px; }
-  .btn-lg       { width: 100%; font-size: 14px; padding: 12px; }
-}
-
-@media (max-width: 380px) {
-  .main-content { padding: 10px 8px; }
-  .stats-grid   { gap: 6px; }
-  .stat-card    { padding: 9px 8px; gap: 6px; }
-  .stat-valor   { font-size: 14px; }
-  .stat-icono   { width: 28px; height: 28px; font-size: 14px; }
-  .card         { padding: 10px 8px; }
-  .page-titulo  { font-size: 15px; }
+/* ============================================================
+   RESPONSIVE ≤ 400px — MÓVIL MUY PEQUEÑO
+   ============================================================ */
+@media (max-width: 400px) {
+  .main-content   { padding: 10px 8px; }
+  .stats-grid     { gap: 6px; }
+  .stat-card      { padding: 8px 7px; gap: 6px; }
+  .stat-valor     { font-size: 14px; }
+  .stat-icono     { width: 26px; height: 26px; font-size: 13px; }
+  .card           { padding: 10px 8px; }
+  .page-titulo    { font-size: 14px; }
 }
 
 /* ============================================================
