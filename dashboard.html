@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stockia — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css?v=1.3">
+  <link rel="stylesheet" href="css/global.css?v=1.4">
 </head>
 <body>
   <div class="app-layout">
@@ -105,7 +105,7 @@
       </div>
 
       <!-- Buscadores rápidos -->
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;" id="buscadoresGrid">
+      <div class="buscadores-grid" id="buscadoresGrid">
         <!-- Buscar producto -->
         <div class="card">
           <div class="card-titulo"><span class="icono">📦</span> Buscar producto</div>
@@ -165,7 +165,7 @@
     var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrd3RzcGdicHFqd3Z5YWx3eW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3MTgsImV4cCI6MjA5MDE5NDcxOH0.b0BOSZApkFBiNVHrusCltKJtx_lGCf9cRncxUn8jr7U';
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/global.js?v=1.3"></script>
+  <script src="js/global.js?v=1.4"></script>
   <script>
     let perfilActual = null;
 
@@ -374,11 +374,6 @@
     }
 
     init();
-
-    // Responsive: ocultar buscadores en móvil
-    if (window.innerWidth < 640) {
-      document.getElementById('buscadoresGrid').style.gridTemplateColumns = '1fr';
-    }
   </script>
 </body>
 </html>
