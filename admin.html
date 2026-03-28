@@ -306,6 +306,34 @@ let datosImportacion = null;
 // Esta URL se usa para llamar a la Edge Function crear-usuario
 const SUPABASE_FUNCTIONS_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co/functions/v1';
 
+// ---- MENÚ HAMBURGUESA MÓVIL ----
+function toggleMenu() {
+  const btn = document.getElementById('navHamburguesa');
+  const menu = document.getElementById('navMenuMovil');
+  const overlay = document.getElementById('navOverlay');
+  if (menu.classList.contains('abierto')) {
+    cerrarMenu();
+  } else {
+    btn.classList.add('abierto');
+    menu.classList.add('abierto');
+    overlay.classList.add('abierto');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function cerrarMenu() {
+  document.getElementById('navHamburguesa').classList.remove('abierto');
+  document.getElementById('navMenuMovil').classList.remove('abierto');
+  document.getElementById('navOverlay').classList.remove('abierto');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('#navMenuMovil a').forEach(a => a.addEventListener('click', cerrarMenu));
+(function() {
+  const pagina = window.location.pathname.split('/').pop();
+  document.querySelectorAll('#navMenuMovil a.nav-link').forEach(a => {
+    if (a.getAttribute('href') === pagina) a.classList.add('activo');
+  });
+})();
+
 async function init() {
   const resultado = await verificarSesion('admin');
   if (!resultado) return;
