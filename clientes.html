@@ -237,7 +237,7 @@
         <div class="estado-vacio">
           <div class="estado-vacio-icono">⚠️</div>
           <div class="estado-vacio-titulo">Error al cargar clientes</div>
-          <div class="estado-vacio-desc" style="color:var(--error);font-family:monospace;font-size:13px">${error.message}</div>
+          <div class="estado-vacio-desc" style="color:var(--rojo);font-family:monospace;font-size:13px">${error.message}</div>
         </div>
       </td></tr>`;
       console.error('Error clientes:', error);
@@ -277,7 +277,7 @@
             <div class="fw-600" style="font-size:16px">${c.nombre}</div>
           </td>
           <td class="fw-600">${c.dni}</td>
-          <td>${c.telefono ? `<a href="tel:${c.telefono}" style="color:var(--secundario)">${c.telefono}</a>` : '-'}</td>
+          <td>${c.telefono ? `<a href="tel:${c.telefono}" style="color:var(--azul-accion)">${c.telefono}</a>` : '-'}</td>
           <td class="texto-suave">${c.direccion || '-'}</td>
           <td class="${deuda > 0 ? 'texto-rojo fw-600' : 'texto-suave'}">${deuda > 0 ? formatoPeso(deuda) : '—'}</td>
           <td class="texto-suave">${formatoFecha(c.created_at)}</td>
@@ -391,27 +391,27 @@
 
     contenido.innerHTML = `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px">
-        <div style="padding:16px;background:var(--fondo);border-radius:var(--radio-sm)">
+        <div style="padding:16px;background:var(--bg);border-radius:var(--r-sm)">
           <div class="texto-suave" style="font-size:13px">DNI</div>
           <div class="fw-600" style="font-size:16px">${cliente.dni}</div>
         </div>
-        <div style="padding:16px;background:var(--fondo);border-radius:var(--radio-sm)">
+        <div style="padding:16px;background:var(--bg);border-radius:var(--r-sm)">
           <div class="texto-suave" style="font-size:13px">Teléfono</div>
           <div class="fw-600" style="font-size:16px">${cliente.telefono || '-'}</div>
         </div>
-        <div style="padding:16px;background:var(--fondo);border-radius:var(--radio-sm);grid-column:1/-1">
+        <div style="padding:16px;background:var(--bg);border-radius:var(--r-sm);grid-column:1/-1">
           <div class="texto-suave" style="font-size:13px">Dirección</div>
           <div class="fw-600" style="font-size:16px">${cliente.direccion || '-'}</div>
         </div>
       </div>
 
       ${deudaTotal > 0 ? `
-        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radio-sm);padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--r-sm);padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
           <span style="font-size:16px;color:#DC2626;font-weight:600">💳 Deuda total pendiente</span>
           <span style="font-size:24px;font-weight:800;color:#DC2626">${formatoPeso(deudaTotal)}</span>
         </div>
       ` : `
-        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--radio-sm);padding:16px;margin-bottom:20px;text-align:center">
+        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--r-sm);padding:16px;margin-bottom:20px;text-align:center">
           <span style="color:#059669;font-weight:600">✓ Sin deuda pendiente</span>
         </div>
       `}

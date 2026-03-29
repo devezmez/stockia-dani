@@ -9,10 +9,10 @@
   <style>
     .item-venta-card {
       border: 2px solid var(--borde);
-      border-radius: var(--radio);
-      padding: 16px;
-      margin-bottom: 12px;
-      background: var(--fondo);
+      border-radius: var(--r-md);
+      padding: 14px;
+      margin-bottom: 10px;
+      background: var(--bg);
       position: relative;
     }
     .item-venta-card .eliminar-item {
@@ -22,14 +22,14 @@
       border: none;
       font-size: 20px;
       cursor: pointer;
-      color: var(--error);
+      color: var(--rojo);
     }
     .resumen-venta {
-      background: var(--primario);
+      background: var(--azul-nav);
       color: white;
-      border-radius: var(--radio);
-      padding: 20px;
-      margin-top: 16px;
+      border-radius: var(--r-md);
+      padding: 18px;
+      margin-top: 14px;
     }
     .resumen-venta .linea {
       display: flex;
@@ -37,45 +37,47 @@
       align-items: center;
       padding: 6px 0;
       border-bottom: 1px solid rgba(255,255,255,0.15);
-      font-size: 15px;
+      font-size: 14px;
     }
-    .resumen-venta .linea:last-child { border-bottom: none; font-size: 18px; font-weight: 800; }
+    .resumen-venta .linea:last-child { border-bottom: none; font-size: 16px; font-weight: 800; }
 
     .cuota-preview {
-      background: #ECFDF5;
-      border: 1px solid #A7F3D0;
-      border-radius: var(--radio-sm);
-      padding: 12px 16px;
+      background: #d1fae5;
+      border: 1px solid #6ee7b7;
+      border-radius: var(--r-sm);
+      padding: 10px 14px;
       margin-top: 8px;
-      font-size: 14px;
-      color: #065F46;
+      font-size: 13px;
+      color: #065f46;
     }
 
     .tabs-ventas {
       display: flex;
       gap: 4px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       background: white;
       border: 1px solid var(--borde);
-      border-radius: var(--radio);
-      padding: 6px;
+      border-radius: var(--r-md);
+      padding: 5px;
       width: fit-content;
+      flex-wrap: wrap;
     }
     .tab-btn {
-      padding: 10px 24px;
+      padding: 10px 20px;
       border: none;
       background: none;
-      border-radius: var(--radio-sm);
-      font-size: 15px;
+      border-radius: var(--r-sm);
+      font-size: 14px;
       font-weight: 600;
       font-family: 'Poppins', sans-serif;
       cursor: pointer;
       color: var(--texto-suave);
-      transition: var(--transicion);
+      transition: var(--transition);
     }
+    .tab-btn:hover { background: var(--bg); color: var(--texto); }
     .tab-btn.activo {
-      background: var(--primario);
-      color: white;
+      background: var(--azul-nav);
+      color: #ffffff;
     }
   </style>
 </head>
@@ -204,7 +206,7 @@
               <input type="text" class="buscador-input" id="buscarClienteVenta" placeholder="Nombre o DNI del cliente...">
             </div>
             <div id="resultadosClienteVenta"></div>
-            <div id="clienteSeleccionado" style="display:none; padding:16px; background:var(--fondo); border-radius:var(--radio-sm); margin-top:8px">
+            <div id="clienteSeleccionado" style="display:none; padding:16px; background:var(--bg); border-radius:var(--r-sm); margin-top:8px">
               <div style="display:flex;justify-content:space-between;align-items:center">
                 <div>
                   <div class="fw-700" style="font-size:17px" id="clienteSelNombre"></div>
@@ -262,7 +264,7 @@
       <button class="modal-cerrar" onclick="cerrarModal('modalPago')">✕</button>
     </div>
 
-    <div id="infoPagoItem" style="background:var(--fondo);border-radius:var(--radio-sm);padding:16px;margin-bottom:20px"></div>
+    <div id="infoPagoItem" style="background:var(--bg);border-radius:var(--r-sm);padding:16px;margin-bottom:20px"></div>
 
     <div class="form-grupo">
       <label class="form-label">Monto a pagar *</label>
@@ -492,8 +494,8 @@
 
     container.innerHTML = data.map(c => `
       <div onclick="seleccionarCliente(${JSON.stringify(c).replace(/"/g, '&quot;')})"
-           style="padding:12px;border:2px solid var(--borde);border-radius:var(--radio-sm);margin-bottom:8px;cursor:pointer;transition:var(--transicion)"
-           onmouseover="this.style.borderColor='var(--secundario)'"
+           style="padding:12px;border:2px solid var(--borde);border-radius:var(--r-sm);margin-bottom:8px;cursor:pointer;transition:var(--transition)"
+           onmouseover="this.style.borderColor='var(--azul-accion)'"
            onmouseout="this.style.borderColor='var(--borde)'">
         <div class="fw-600" style="font-size:16px">${c.nombre}</div>
         <div class="texto-suave" style="font-size:13px">DNI: ${c.dni}</div>
@@ -533,14 +535,14 @@
 
     container.innerHTML = filtrados.map(p => `
       <div onclick="agregarItemVenta('${p.id}')"
-           style="display:flex;justify-content:space-between;align-items:center;padding:12px;border:2px solid var(--borde);border-radius:var(--radio-sm);margin-bottom:8px;cursor:pointer;transition:var(--transicion)"
-           onmouseover="this.style.borderColor='var(--acento)'"
+           style="display:flex;justify-content:space-between;align-items:center;padding:12px;border:2px solid var(--borde);border-radius:var(--r-sm);margin-bottom:8px;cursor:pointer;transition:var(--transition)"
+           onmouseover="this.style.borderColor='var(--verde)'"
            onmouseout="this.style.borderColor='var(--borde)'">
         <div>
           <div class="fw-600">${p.nombre}</div>
           <div class="texto-suave" style="font-size:13px">Stock disponible: ${p.stock}</div>
         </div>
-        <div class="fw-700" style="color:var(--primario)">${formatoPeso(p.precio)}</div>
+        <div class="fw-700" style="color:var(--azul-nav)">${formatoPeso(p.precio)}</div>
       </div>
     `).join('');
   }
@@ -623,7 +625,7 @@
             </div>
 
             <!-- Vencimiento y mora -->
-            <div style="margin-top:12px; padding:14px; background:white; border:1px solid var(--borde); border-radius:var(--radio-sm)">
+            <div style="margin-top:12px; padding:14px; background:white; border:1px solid var(--borde); border-radius:var(--r-sm)">
               <div style="font-size:13px;font-weight:700;color:var(--texto-suave);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">⚠️ Condiciones de mora</div>
               <div class="form-fila" style="gap:12px;margin-bottom:10px">
                 <div>
@@ -651,7 +653,7 @@
                 <div style="font-size:12px;color:var(--texto-suave);margin-top:4px">Se suma a la mora solo cuando el pago es fuera de término</div>
               </div>
               ${(item.porcentaje_mora > 0 || item.porcentaje_gasto_admin > 0) ? `
-              <div style="margin-top:10px;padding:10px;background:#FFF7ED;border-radius:var(--radio-sm);font-size:13px;color:#92400E">
+              <div style="margin-top:10px;padding:10px;background:#FFF7ED;border-radius:var(--r-sm);font-size:13px;color:#92400E">
                 Si paga tarde: cuota ${formatoPeso(cuotaValor)} + mora ${item.porcentaje_mora||0}% + admin ${item.porcentaje_gasto_admin||0}%
                 = <strong>${formatoPeso(cuotaValor * (1 + ((item.porcentaje_mora||0) + (item.porcentaje_gasto_admin||0)) / 100))}</strong>
               </div>` : ''}
@@ -923,7 +925,7 @@
     ventaItemActual._fechaVto = fechaVto;
 
     const alertaMora = hayMora ? `
-      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radio-sm);padding:12px 14px;margin-top:12px;font-size:14px">
+      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--r-sm);padding:12px 14px;margin-top:12px;font-size:14px">
         <div style="font-weight:700;color:#DC2626;margin-bottom:6px">⚠️ Pago FUERA DE TÉRMINO — Se aplica mora</div>
         <div style="color:#7F1D1D">
           Vencimiento: <strong>${formatoFecha(data.proxima_fecha_pago)}</strong><br>
@@ -933,7 +935,7 @@
           <span style="font-size:16px;font-weight:800">Total a cobrar: ${formatoPeso(totalConMora)}</span>
         </div>
       </div>` : (tieneFechaVto ? `
-      <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--radio-sm);padding:10px 14px;margin-top:12px;font-size:13px;color:#065F46">
+      <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--r-sm);padding:10px 14px;margin-top:12px;font-size:13px;color:#065F46">
         ✓ Pago en término · Vencía el <strong>${formatoFecha(data.proxima_fecha_pago)}</strong>
       </div>` : '');
 
@@ -943,11 +945,11 @@
       <div style="margin-top:12px;display:flex;gap:20px;flex-wrap:wrap">
         <div>
           <div class="texto-suave" style="font-size:12px">DEUDA RESTANTE</div>
-          <div style="font-size:22px;font-weight:800;color:var(--error)">${formatoPeso(data.deuda_restante)}</div>
+          <div style="font-size:22px;font-weight:800;color:var(--rojo)">${formatoPeso(data.deuda_restante)}</div>
         </div>
         <div>
           <div class="texto-suave" style="font-size:12px">CUOTA NORMAL</div>
-          <div style="font-size:22px;font-weight:800;color:var(--primario)">${formatoPeso(data.valor_cuota)}</div>
+          <div style="font-size:22px;font-weight:800;color:var(--azul-nav)">${formatoPeso(data.valor_cuota)}</div>
         </div>
         ${hayMora ? `<div>
           <div class="texto-suave" style="font-size:12px">CON MORA</div>
@@ -1042,12 +1044,12 @@
     const tieneMora = item?.porcentaje_mora > 0 || item?.porcentaje_gasto_admin > 0;
 
     contenido.innerHTML = `
-      <div style="background:var(--fondo);border-radius:var(--radio-sm);padding:16px;margin-bottom:20px">
+      <div style="background:var(--bg);border-radius:var(--r-sm);padding:16px;margin-bottom:20px">
         <div class="fw-600" style="font-size:16px">${item?.productos?.nombre}</div>
         <div class="texto-suave">Cliente: ${item?.ventas?.clientes?.nombre}${item?.ventas?.vendedor ? ` · Vendedor: ${item.ventas.vendedor}` : ''}</div>
         <div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
           <div><span class="texto-suave">Total: </span><strong>${formatoPeso(item?.total_item)}</strong></div>
-          <div><span class="texto-suave">Deuda: </span><strong style="color:var(--error)">${formatoPeso(item?.deuda_restante)}</strong></div>
+          <div><span class="texto-suave">Deuda: </span><strong style="color:var(--rojo)">${formatoPeso(item?.deuda_restante)}</strong></div>
           ${item?.dia_vencimiento ? `<div><span class="texto-suave">Vto.: </span><strong>Día ${item.dia_vencimiento}</strong></div>` : ''}
           ${tieneMora ? `<div><span class="badge badge-rojo">Mora ${item.porcentaje_mora}% + admin ${item.porcentaje_gasto_admin}%</span></div>` : ''}
         </div>

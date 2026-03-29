@@ -155,7 +155,7 @@
       Producto: <strong id="stockProductoNombre"></strong>
     </p>
     <p style="font-size:16px; margin-bottom:20px">
-      Stock actual: <strong id="stockProductoActual" style="font-size:20px; color:var(--primario)"></strong> unidades
+      Stock actual: <strong id="stockProductoActual" style="font-size:20px; color:var(--azul-nav)"></strong> unidades
     </p>
 
     <div class="form-grupo">
@@ -286,7 +286,7 @@
         <div class="estado-vacio">
           <div class="estado-vacio-icono">⚠️</div>
           <div class="estado-vacio-titulo">Error al cargar productos</div>
-          <div class="estado-vacio-desc" style="color:var(--error);font-family:monospace;font-size:13px">${error.message}</div>
+          <div class="estado-vacio-desc" style="color:var(--rojo);font-family:monospace;font-size:13px">${error.message}</div>
         </div>
       </td></tr>`;
       console.error('Error productos:', error);
@@ -321,7 +321,7 @@
             <div class="fw-600" style="font-size:16px">${p.nombre}</div>
             ${p.descripcion ? `<div class="texto-suave" style="font-size:13px">${p.descripcion.substring(0,60)}${p.descripcion.length > 60 ? '...' : ''}</div>` : ''}
           </td>
-          <td class="fw-700" style="font-size:16px; color:var(--primario)">${formatoPeso(p.precio)}</td>
+          <td class="fw-700" style="font-size:16px; color:var(--azul-nav)">${formatoPeso(p.precio)}</td>
           <td>${stockBadge}</td>
           <td><span class="badge badge-verde">● Activo</span></td>
           <td class="texto-suave">${formatoFecha(p.created_at)}</td>

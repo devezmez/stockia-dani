@@ -33,7 +33,7 @@
     .avatar {
       width: 44px; height: 44px;
       border-radius: 50%;
-      background: var(--primario);
+      background: var(--azul-nav);
       color: white;
       font-size: 18px;
       font-weight: 700;
@@ -44,23 +44,23 @@
     }
     .avatar.operador { background: var(--texto-suave); }
     .export-area {
-      background: var(--fondo);
+      background: var(--bg);
       border: 2px dashed var(--borde);
-      border-radius: var(--radio);
+      border-radius: var(--r-md);
       padding: 32px;
       text-align: center;
     }
     .drop-zone {
-      background: var(--fondo);
+      background: var(--bg);
       border: 3px dashed var(--borde);
-      border-radius: var(--radio);
+      border-radius: var(--r-md);
       padding: 40px 20px;
       text-align: center;
       cursor: pointer;
-      transition: var(--transicion);
+      transition: var(--transition);
     }
     .drop-zone:hover, .drop-zone.sobre {
-      border-color: var(--secundario);
+      border-color: var(--azul-accion);
       background: #EFF6FF;
     }
     /* Ojito en modal */
@@ -85,13 +85,13 @@
       transition: color 0.15s;
       user-select: none;
     }
-    .btn-ojo:hover { color: var(--primario); }
+    .btn-ojo:hover { color: var(--azul-nav); }
 
     /* Info box */
     .info-box {
       background: #EFF6FF;
       border: 1px solid #BFDBFE;
-      border-radius: var(--radio-sm);
+      border-radius: var(--r-sm);
       padding: 14px 16px;
       font-size: 14px;
       color: #1E40AF;
@@ -215,7 +215,7 @@
       <!-- IMPORTAR -->
       <div class="card" style="grid-column: 1 / -1">
         <div class="admin-section-title">📂 Importar / Restaurar base de datos</div>
-        <div style="background:#FFF7ED;border:1px solid #FDE68A;border-radius:var(--radio-sm);padding:14px;margin-bottom:16px">
+        <div style="background:#FFF7ED;border:1px solid #FDE68A;border-radius:var(--r-sm);padding:14px;margin-bottom:16px">
           ⚠️ <strong>Atención:</strong> La importación reemplazará los datos existentes. Hacé un backup antes de continuar.
         </div>
         <div class="drop-zone" id="dropZone" onclick="document.getElementById('inputImportar').click()">
@@ -284,7 +284,7 @@
 
     <!-- Alerta de error del modal -->
     <div id="alertaModalUsuario" style="display:none;background:#FEF2F2;border:1px solid #FECACA;
-      border-radius:var(--radio-sm);padding:12px 14px;font-size:14px;color:#DC2626;
+      border-radius:var(--r-sm);padding:12px 14px;font-size:14px;color:#DC2626;
       margin-bottom:8px;align-items:center;gap:8px">
       <span>⚠️</span><span id="alertaModalUsuarioTexto"></span>
     </div>
@@ -609,7 +609,7 @@ function procesarImportacion(file) {
       const vistaPrevia = document.getElementById('vistaPrevia');
       vistaPrevia.style.display = 'block';
       vistaPrevia.innerHTML = `
-        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--radio-sm);padding:20px;margin-bottom:16px">
+        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--r-sm);padding:20px;margin-bottom:16px">
           <div class="fw-700" style="margin-bottom:8px">✅ Archivo válido: ${file.name}</div>
           <div class="texto-suave" style="font-size:14px">
             Exportado el: ${new Date(datos.fecha_exportacion).toLocaleString('es-AR')} · v${datos.version}
@@ -623,7 +623,7 @@ function procesarImportacion(file) {
             <div>📊 ${d.stock_movimientos?.length || 0} movimientos</div>
           </div>
         </div>
-        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radio-sm);padding:14px;margin-bottom:16px;font-size:14px">
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--r-sm);padding:14px;margin-bottom:16px;font-size:14px">
           ⚠️ Esta acción reemplazará los datos existentes. No se puede deshacer.
         </div>
         <button class="btn btn-peligro btn-lg w-100" onclick="confirmarImportacion()">
