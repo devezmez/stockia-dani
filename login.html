@@ -2,482 +2,364 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stockia — Iniciar sesión</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Stockia — Ingresar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primario: #1F3A8A;
-      --primario-hover: #162d6e;
-      --secundario: #3B82F6;
-      --acento: #10B981;
-      --fondo: #F3F4F6;
-      --texto: #111827;
-      --texto-suave: #6B7280;
-      --borde: #E5E7EB;
-      --error: #EF4444;
-      --radio: 12px;
-      --radio-sm: 8px;
-      --transicion: 0.2s ease;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--fondo);
-      color: var(--texto);
-      min-height: 100vh;
+      background: #1a2f6b;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 20px 60px;
+      padding: 24px 16px 72px;
       position: relative;
-      overflow: hidden;
     }
 
-    /* Fondo decorativo */
+    /* Fondo decorativo sutil */
     body::before {
       content: '';
       position: fixed;
-      top: -200px; left: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(31,58,138,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -200px; right: -200px;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+      top: -30%; right: -20%;
+      width: 60vw; height: 60vw;
+      background: radial-gradient(circle, rgba(59,130,246,.18) 0%, transparent 70%);
       pointer-events: none;
     }
 
-    .login-contenedor {
+    /* ── Logo area ── */
+    .logo-area {
+      text-align: center;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+    .logo-svg-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 8px;
+    }
+    .logo-tagline {
+      color: rgba(255,255,255,.75);
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    /* ── Card ── */
+    .login-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px 24px 24px;
       width: 100%;
-      max-width: 440px;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.30);
       position: relative;
       z-index: 1;
     }
 
-    /* Logo area */
-    .login-logo {
-      text-align: center;
-      margin-bottom: 36px;
-    }
-
-    .logo-svg-area {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--primario);
-      border-radius: 20px;
-      padding: 18px 32px;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 24px rgba(31,58,138,0.3);
-    }
-
-    .login-tagline {
-      font-size: 16px;
-      color: var(--texto-suave);
-      font-weight: 500;
-    }
-
-    /* Tarjeta de login */
-    .login-card {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-      border: 1px solid var(--borde);
-    }
-
     .login-titulo {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--texto);
-      margin-bottom: 6px;
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 4px;
     }
-
     .login-subtitulo {
-      font-size: 15px;
-      color: var(--texto-suave);
-      margin-bottom: 32px;
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 24px;
     }
 
-    .form-grupo { margin-bottom: 20px; }
+    /* Alerta error */
+    .alerta-login {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #b91c1c;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .alerta-login.visible { display: flex; }
 
+    /* Form */
+    .form-grupo { margin-bottom: 16px; }
     .form-label {
       display: block;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--texto);
-      margin-bottom: 8px;
+      color: #374151;
+      margin-bottom: 6px;
     }
-
-    .input-contenedor { position: relative; }
-
-    .input-icono {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 20px;
-      pointer-events: none;
-    }
+    .input-wrap { position: relative; }
 
     .form-input {
       width: 100%;
-      padding: 15px 16px 15px 46px;
-      border: 2px solid var(--borde);
-      border-radius: var(--radio-sm);
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
       font-size: 16px;
-      font-family: 'Inter', sans-serif;
-      color: var(--texto);
-      background: white;
-      transition: var(--transicion);
+      font-family: 'Poppins', sans-serif;
+      color: #111827;
+      background: #fff;
       outline: none;
+      transition: border-color .18s, box-shadow .18s;
+      -webkit-appearance: none;
     }
-
     .form-input:focus {
-      border-color: var(--secundario);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
     }
+    .form-input.error { border-color: #ef4444; }
 
-    .form-input.error { border-color: var(--error); }
+    /* Ojito */
+    .btn-ojo {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 19px;
+      color: #9ca3af;
+      padding: 4px;
+      line-height: 1;
+      transition: color .15s;
+    }
+    .btn-ojo:hover { color: #1a2f6b; }
+
     .form-error {
-      color: var(--error);
-      font-size: 13px;
-      margin-top: 6px;
+      font-size: 12px;
+      color: #ef4444;
+      margin-top: 4px;
       display: none;
     }
     .form-error.visible { display: block; }
 
-    .btn-login {
+    /* Botón principal */
+    .btn-ingresar {
       width: 100%;
-      padding: 16px;
-      background: var(--primario);
-      color: white;
+      padding: 14px;
+      background: #3b82f6;
+      color: #fff;
       border: none;
-      border-radius: var(--radio-sm);
-      font-size: 17px;
+      border-radius: 12px;
+      font-size: 16px;
       font-weight: 700;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Poppins', sans-serif;
       cursor: pointer;
-      transition: var(--transicion);
+      transition: background .18s, transform .1s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 8px;
+      margin-top: 4px;
     }
-
-    .btn-login:hover:not(:disabled) { background: var(--primario-hover); transform: translateY(-1px); }
-    .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+    .btn-ingresar:hover:not(:disabled) {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    .btn-ingresar:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
     .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: white;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin .7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Alerta de error general */
-    .alerta-login {
-      background: #FEF2F2;
-      border: 1px solid #FECACA;
-      border-radius: var(--radio-sm);
-      padding: 14px 16px;
-      font-size: 14px;
-      color: #DC2626;
-      margin-bottom: 20px;
-      display: none;
-      align-items: center;
-      gap: 10px;
-    }
-    .alerta-login.visible { display: flex; }
-
-    .btn-toggle-pass {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--texto-suave);
-      padding: 4px;
-      line-height: 1;
-      transition: color 0.15s;
-      user-select: none;
-    }
-    .btn-toggle-pass:hover { color: var(--primario); }
-
-    .login-footer {
+    .login-ayuda {
       text-align: center;
-      margin-top: 24px;
-      font-size: 13px;
-      color: var(--texto-suave);
-    }
-
-    .copyright-footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      text-align: center;
-      padding: 12px;
+      margin-top: 18px;
       font-size: 12px;
-      color: #9CA3AF;
-      background: var(--fondo);
-      border-top: 1px solid var(--borde);
-      z-index: 10;
+      color: #9ca3af;
     }
-
-    /* Ojito mostrar/ocultar contraseña */
-    .toggle-password {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--texto-suave);
-      padding: 4px;
-      line-height: 1;
-      transition: color 0.15s;
-      user-select: none;
-    }
-    .toggle-password:hover { color: var(--primario); }
 
     /* Footer copyright */
-    .copyright-footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--texto-suave);
-      opacity: 0.7;
-    }
-
-    /* Indicador de versión */
-    .version-badge {
+    .copyright {
       position: fixed;
-      bottom: 16px;
-      right: 16px;
-      font-size: 12px;
-      color: var(--texto-suave);
-      background: white;
-      border: 1px solid var(--borde);
-      padding: 4px 10px;
-      border-radius: 20px;
+      bottom: 0; left: 0; right: 0;
+      text-align: center;
+      padding: 12px;
+      font-size: 11px;
+      color: rgba(255,255,255,.45);
+      background: rgba(0,0,0,.15);
+      font-family: 'Poppins', sans-serif;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
 
-  <div class="login-contenedor">
-    <!-- Logo -->
-    <div class="login-logo">
-      <div class="logo-svg-area">
-        <!-- Logo SVG inline -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" width="200" height="44">
-          <text x="0" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">St</text>
-          <!-- "o" como caja -->
-          <g transform="translate(52, 6)">
-            <rect x="0" y="11" width="24" height="17" rx="2.5" fill="#10B981"/>
-            <path d="M0 11 L4.5 4 L19.5 4 L24 11 Z" fill="#059669"/>
-            <line x1="0" y1="11" x2="24" y2="11" stroke="white" stroke-width="1.2" stroke-opacity="0.4"/>
-            <line x1="12" y1="11" x2="12" y2="28" stroke="white" stroke-width="1" stroke-opacity="0.3"/>
-          </g>
-          <text x="80" y="36" font-family="Inter,sans-serif" font-weight="800" font-size="38" fill="white" letter-spacing="-1">ckia</text>
-        </svg>
-      </div>
-      <div class="login-tagline">Tu inventario, bajo control.</div>
+  <!-- Logo -->
+  <div class="logo-area">
+    <div class="logo-svg-wrap">
+      <!-- Logo SVG Stockia con caja como "o" -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 50" width="200" height="46">
+        <!-- St -->
+        <text x="0" y="40" font-family="Poppins,sans-serif" font-weight="800" font-size="42" fill="white" letter-spacing="-1">St</text>
+        <!-- "o" = caja -->
+        <g transform="translate(55,7)">
+          <rect x="0" y="12" width="26" height="18" rx="3" fill="white" opacity=".15"/>
+          <rect x="0" y="12" width="26" height="18" rx="3" fill="none" stroke="white" stroke-width="2.5"/>
+          <!-- tapa -->
+          <path d="M0 12 L5 5 L21 5 L26 12" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- solapa izquierda -->
+          <line x1="5" y1="5" x2="7" y2="12" stroke="white" stroke-width="1.5" opacity=".6"/>
+          <!-- solapa derecha -->
+          <line x1="21" y1="5" x2="19" y2="12" stroke="white" stroke-width="1.5" opacity=".6"/>
+          <!-- línea central -->
+          <line x1="13" y1="12" x2="13" y2="30" stroke="white" stroke-width="1.2" opacity=".4"/>
+        </g>
+        <!-- ckia -->
+        <text x="86" y="40" font-family="Poppins,sans-serif" font-weight="800" font-size="42" fill="white" letter-spacing="-1">ckia</text>
+      </svg>
     </div>
-
-    <!-- Card de login -->
-    <div class="login-card">
-      <h1 class="login-titulo">👋 Bienvenido</h1>
-      <p class="login-subtitulo">Ingresá con tu cuenta para continuar</p>
-
-      <!-- Alerta de error -->
-      <div class="alerta-login" id="alertaLogin">
-        <span>⚠️</span>
-        <span id="alertaLoginTexto"></span>
-      </div>
-
-      <form id="formLogin" novalidate>
-        <div class="form-grupo">
-          <label class="form-label" for="email">📧 Correo electrónico</label>
-          <div class="input-contenedor">
-            <input
-              type="email"
-              id="email"
-              class="form-input"
-              placeholder="tu@email.com"
-              autocomplete="email"
-              inputmode="email"
-              required
-            >
-          </div>
-          <div class="form-error" id="errorEmail">Por favor ingresá un email válido.</div>
-        </div>
-
-        <div class="form-grupo">
-          <label class="form-label" for="password">🔒 Contraseña</label>
-          <div class="input-contenedor">
-            <input
-              type="password"
-              id="password"
-              class="form-input"
-              placeholder="Tu contraseña"
-              autocomplete="current-password"
-              style="padding-right: 48px"
-              required
-            >
-            <button type="button" class="btn-toggle-pass" id="btnTogglePass" onclick="togglePassword()" title="Mostrar / ocultar contraseña">
-              👁️
-            </button>
-          </div>
-          <div class="form-error" id="errorPassword">Por favor ingresá tu contraseña.</div>
-        </div>
-
-        <button type="submit" class="btn-login" id="btnLogin">
-          <span id="btnLoginTexto">Ingresar al sistema</span>
-        </button>
-      </form>
-
-      <div class="login-footer">
-        ¿Problemas para ingresar? Contactá al administrador.
-      </div>
-    </div>
+    <p class="logo-tagline">Tu inventario, bajo control.</p>
   </div>
 
-  <div class="copyright-footer">
-    © <span id="anioActual"></span> Stockia. Todos los derechos reservados.
+  <!-- Card de login -->
+  <div class="login-card">
+    <h1 class="login-titulo">Bienvenido/a 👋</h1>
+    <p class="login-subtitulo">Ingresá tus datos para continuar</p>
+
+    <div class="alerta-login" id="alertaLogin">
+      <span>⚠️</span>
+      <span id="alertaLoginTexto"></span>
+    </div>
+
+    <form id="formLogin" novalidate>
+      <div class="form-grupo">
+        <label class="form-label" for="email">Correo electrónico</label>
+        <div class="input-wrap">
+          <input type="email" id="email" class="form-input"
+            placeholder="tu@email.com"
+            autocomplete="email" inputmode="email" required>
+        </div>
+        <div class="form-error" id="errorEmail">Ingresá un email válido.</div>
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label" for="password">Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="password" class="form-input"
+            placeholder="Tu contraseña" style="padding-right: 44px"
+            autocomplete="current-password" required>
+          <button type="button" class="btn-ojo" id="btnOjo" onclick="togglePass()" title="Mostrar contraseña">👁️</button>
+        </div>
+        <div class="form-error" id="errorPass">Ingresá tu contraseña.</div>
+      </div>
+
+      <button type="submit" class="btn-ingresar" id="btnIngresar">
+        <span id="btnIngresarTexto">Ingresar</span>
+      </button>
+    </form>
+
+    <p class="login-ayuda">¿Problemas para ingresar? Contactá al administrador.</p>
   </div>
 
-  <!-- Supabase -->
+  <div class="copyright">
+    © <span id="anio"></span> Stockia. Todos los derechos reservados.
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co';
+    const SUPABASE_URL     = 'https://gkwtspgbpqjwvyalwymc.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrd3RzcGdicHFqd3Z5YWx3eW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3MTgsImV4cCI6MjA5MDE5NDcxOH0.b0BOSZApkFBiNVHrusCltKJtx_lGCf9cRncxUn8jr7U';
-
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Año dinámico en el footer
-    document.getElementById('anioActual').textContent = new Date().getFullYear();
+    document.getElementById('anio').textContent = new Date().getFullYear();
 
-    // Toggle mostrar / ocultar contraseña
-    function togglePassword() {
-      const input = document.getElementById('password');
-      const btn = document.getElementById('btnTogglePass');
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈';
-        btn.title = 'Ocultar contraseña';
-      } else {
-        input.type = 'password';
-        btn.textContent = '👁️';
-        btn.title = 'Mostrar contraseña';
-      }
-    }
-
-    // Si ya hay sesión, redirigir
+    // Redirigir si ya hay sesión
     sb.auth.getSession().then(({ data: { session } }) => {
       if (session) window.location.href = '/dashboard.html';
     });
 
-    const form = document.getElementById('formLogin');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnTexto = document.getElementById('btnLoginTexto');
-    const alerta = document.getElementById('alertaLogin');
-    const alertaTexto = document.getElementById('alertaLoginTexto');
-
-    function mostrarAlertaLogin(msg) {
-      alertaTexto.textContent = msg;
-      alerta.classList.add('visible');
+    // Ojito
+    function togglePass() {
+      const inp = document.getElementById('password');
+      const btn = document.getElementById('btnOjo');
+      if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+      else { inp.type = 'password'; btn.textContent = '👁️'; }
     }
 
-    function ocultarAlertaLogin() {
-      alerta.classList.remove('visible');
-    }
-
-    function setLoading(cargando) {
-      btnLogin.disabled = cargando;
-      btnTexto.innerHTML = cargando
+    // Loading state
+    function setLoading(on) {
+      const btn = document.getElementById('btnIngresar');
+      btn.disabled = on;
+      document.getElementById('btnIngresarTexto').innerHTML = on
         ? '<div class="spinner"></div>'
-        : 'Ingresar al sistema';
+        : 'Ingresar';
     }
 
-    form.addEventListener('submit', async (e) => {
+    // Alertas
+    function mostrarError(msg) {
+      document.getElementById('alertaLoginTexto').textContent = msg;
+      document.getElementById('alertaLogin').classList.add('visible');
+    }
+    function ocultarError() {
+      document.getElementById('alertaLogin').classList.remove('visible');
+    }
+
+    // Submit
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
       e.preventDefault();
-      ocultarAlertaLogin();
+      ocultarError();
 
-      const email = document.getElementById('email').value.trim();
+      const email    = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-
-      // Validaciones
-      let valido = true;
+      let ok = true;
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         document.getElementById('errorEmail').classList.add('visible');
         document.getElementById('email').classList.add('error');
-        valido = false;
+        ok = false;
       } else {
         document.getElementById('errorEmail').classList.remove('visible');
         document.getElementById('email').classList.remove('error');
       }
 
       if (!password) {
-        document.getElementById('errorPassword').classList.add('visible');
+        document.getElementById('errorPass').classList.add('visible');
         document.getElementById('password').classList.add('error');
-        valido = false;
+        ok = false;
       } else {
-        document.getElementById('errorPassword').classList.remove('visible');
+        document.getElementById('errorPass').classList.remove('visible');
         document.getElementById('password').classList.remove('error');
       }
 
-      if (!valido) return;
-
+      if (!ok) return;
       setLoading(true);
 
       try {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) { mostrarError('Email o contraseña incorrectos.'); setLoading(false); return; }
 
-        if (error) {
-          mostrarAlertaLogin('Email o contraseña incorrectos. Verificá tus datos.');
-          setLoading(false);
-          return;
-        }
-
-        // Verificar que el usuario esté activo
-        const { data: perfil, error: perfilError } = await sb
-          .from('profiles')
-          .select('activo, rol')
-          .eq('id', data.user.id)
-          .single();
-
-        if (perfilError || !perfil || !perfil.activo) {
+        const { data: perfil } = await sb.from('profiles').select('activo').eq('id', data.user.id).single();
+        if (!perfil?.activo) {
           await sb.auth.signOut();
-          mostrarAlertaLogin('Tu cuenta está desactivada. Contactá al administrador.');
-          setLoading(false);
-          return;
+          mostrarError('Tu cuenta está desactivada. Contactá al administrador.');
+          setLoading(false); return;
         }
 
-        // Redirigir al dashboard
         window.location.href = '/dashboard.html';
-
-      } catch (err) {
-        mostrarAlertaLogin('Error de conexión. Intentá nuevamente.');
+      } catch {
+        mostrarError('Error de conexión. Intentá nuevamente.');
         setLoading(false);
       }
     });
