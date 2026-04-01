@@ -163,6 +163,7 @@
           <table class="tabla">
             <thead>
               <tr>
+                <th>Nro. Venta</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Producto</th>
@@ -176,7 +177,7 @@
               </tr>
             </thead>
             <tbody id="tablaVentas">
-              <tr><td colspan="9"><div class="cargando"><div class="spinner"></div></div></td></tr>
+              <tr><td colspan="11"><div class="cargando"><div class="spinner"></div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -189,12 +190,19 @@
 
         <!-- Formulario -->
         <div>
-        <!-- Vendedor -->
+        <!-- Vendedor + Nro Venta -->
           <div class="card mb-24">
-            <div class="card-titulo">🧑‍💼 Paso 1: Vendedor</div>
-            <div class="form-grupo" style="margin-bottom:0">
+            <div class="card-titulo">🧑‍💼 Paso 1: Datos de la venta</div>
+            <div class="form-grupo">
               <label class="form-label">Nombre del vendedor (opcional)</label>
               <input type="text" id="vendedorNombre" class="form-input" placeholder="Ej: Juan Pérez">
+            </div>
+            <div class="form-grupo" style="margin-bottom:0">
+              <label class="form-label">Número / Código de venta
+                <span id="nroVentaSugerencia" style="font-size:11px;font-weight:400;color:var(--azul-accion);margin-left:8px"></span>
+              </label>
+              <input type="text" id="nroVenta" class="form-input" placeholder="Ej: VTA-001">
+              <div id="errorNroVenta" style="display:none;color:var(--rojo);font-size:12px;margin-top:4px">Ya existe una venta con ese número.</div>
             </div>
           </div>
 
@@ -373,6 +381,28 @@
     document.getElementById('seccionNueva').style.display = tab === 'nueva' ? 'block' : 'none';
     document.getElementById('tabListado').classList.toggle('activo', tab === 'listado');
     document.getElementById('tabNueva').classList.toggle('activo', tab === 'nueva');
+    // Sugerir número de venta al abrir "Nueva venta"
+    if (tab === 'nueva') sugerirNroVenta();
+  }
+
+  async function sugerirNroVenta() {
+    const { data } = await sb.from('ventas')
+      .select('nro_venta')
+      .not('nro_venta', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    let siguiente = 1;
+    if (data && data.length > 0) {
+      const nums = data
+        .map(v => { const m = (v.nro_venta || '').match(/(\d+)$/); return m ? parseInt(m[1]) : 0; })
+        .filter(n => n > 0);
+      if (nums.length > 0) siguiente = Math.max(...nums) + 1;
+    }
+    const sugerido = String(siguiente).padStart(4, '0');
+    document.getElementById('nroVentaSugerencia').textContent = `(sugerido: VTA-${sugerido})`;
+    const campo = document.getElementById('nroVenta');
+    if (!campo.value) campo.value = `VTA-${sugerido}`;
   }
 
   async function cargarProductosCatalogo() {
@@ -382,7 +412,7 @@
 
   async function cargarVentas(query = '') {
     const tbody = document.getElementById('tablaVentas');
-    tbody.innerHTML = '<tr><td colspan="10"><div class="cargando"><div class="spinner"></div></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11"><div class="cargando"><div class="spinner"></div></div></td></tr>';
 
     const { data, error } = await sb
       .from('venta_items')
@@ -391,7 +421,7 @@
         proxima_fecha_pago, created_at, porcentaje_recargo, precio_base_total,
         dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin,
         productos(nombre),
-        ventas(id, vendedor, clientes(nombre))
+        ventas(id, vendedor, nro_venta, clientes(nombre))
       `)
       .in('estado', ['activo', 'pagado'])
       .order('created_at', { ascending: false })
@@ -407,7 +437,7 @@
     }
 
     if (error || filtrados.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="10">
+      tbody.innerHTML = `<tr><td colspan="11">
         <div class="estado-vacio">
           <div class="estado-vacio-icono">💰</div>
           <div class="estado-vacio-titulo">${query ? 'Sin resultados' : 'Sin ventas registradas'}</div>
@@ -427,6 +457,11 @@
 
     tbody.innerHTML = filtrados.map(v => `
       <tr>
+        <td>
+          ${v.ventas?.nro_venta
+            ? `<span class="badge badge-azul" style="font-size:12px;font-weight:700">${v.ventas.nro_venta}</span>`
+            : '<span class="texto-suave" style="font-size:12px">—</span>'}
+        </td>
         <td class="texto-suave">${formatoFecha(v.created_at)}</td>
         <td class="fw-600">${v.ventas?.clientes?.nombre || '-'}</td>
         <td>${v.productos?.nombre || '-'}</td>
@@ -778,17 +813,32 @@
     try {
       const usuario = (await sb.auth.getUser()).data.user;
       const vendedor = document.getElementById('vendedorNombre').value.trim();
+      const nroVenta = document.getElementById('nroVenta').value.trim();
+
+      // Validar número de venta duplicado
+      document.getElementById('errorNroVenta').style.display = 'none';
+      if (nroVenta) {
+        const { data: dupVta } = await sb.from('ventas')
+          .select('id').eq('nro_venta', nroVenta).maybeSingle();
+        if (dupVta) {
+          document.getElementById('errorNroVenta').style.display = 'block';
+          mostrarAlerta('Ya existe una venta con ese número.', 'error');
+          btn.disabled = false; btn.textContent = '✅ Confirmar Venta';
+          return;
+        }
+      }
       const totalVenta = itemsVenta.reduce((a, i) => {
         const base = i.precio * i.cantidad;
         return a + base + (base * (i.recargo || 0) / 100);
       }, 0);
 
-      // Crear venta (con vendedor)
+      // Crear venta (con vendedor y nro_venta)
       const { data: venta, error: errVenta } = await sb.from('ventas').insert({
         cliente_id: clienteVenta.id,
         usuario_id: usuario.id,
         total_venta: totalVenta,
-        vendedor: vendedor || null
+        vendedor: vendedor || null,
+        nro_venta: nroVenta || null
       }).select().single();
 
       if (errVenta) throw errVenta;
@@ -858,6 +908,9 @@
       itemsVenta = [];
       contadorItems = 0;
       document.getElementById('vendedorNombre').value = '';
+      document.getElementById('nroVenta').value = '';
+      document.getElementById('nroVentaSugerencia').textContent = '';
+      document.getElementById('errorNroVenta').style.display = 'none';
       limpiarCliente();
       renderizarItems();
       actualizarResumen();

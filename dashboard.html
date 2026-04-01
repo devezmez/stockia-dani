@@ -123,7 +123,7 @@
           <div class="card-titulo"><span class="icono">👥</span> Buscar cliente</div>
           <div class="buscador-contenedor" style="margin-bottom:0">
             <span class="buscador-icono">🔍</span>
-            <input type="text" class="buscador-input" id="buscarCliente" placeholder="Nombre o DNI...">
+            <input type="text" class="buscador-input" id="buscarCliente" placeholder="Nombre, DNI o código...">
           </div>
           <div id="resultadosCliente" style="margin-top:12px"></div>
         </div>
@@ -357,8 +357,8 @@
       if (!query) { container.innerHTML = ''; return; }
 
       const { data } = await sb.from('clientes')
-        .select('nombre, dni, telefono')
-        .or(`nombre.ilike.%${query}%,dni.ilike.%${query}%`)
+        .select('nombre, dni, telefono, codigo_cliente')
+        .or(`nombre.ilike.%${query}%,dni.ilike.%${query}%,codigo_cliente.ilike.%${query}%`)
         .eq('activo', true)
         .limit(5);
 
@@ -369,7 +369,10 @@
 
       container.innerHTML = data.map(c => `
         <div style="padding:10px 0;border-bottom:1px solid var(--borde)">
-          <div class="fw-600" style="font-size:15px">${c.nombre}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="fw-600" style="font-size:15px">${c.nombre}</div>
+            ${c.codigo_cliente ? `<span style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-weight:700">${c.codigo_cliente}</span>` : ''}
+          </div>
           <div class="texto-suave" style="font-size:13px">DNI: ${c.dni} · Tel: ${c.telefono || '-'}</div>
         </div>
       `).join('');

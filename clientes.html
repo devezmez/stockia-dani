@@ -74,7 +74,7 @@
     <div class="card mb-24">
       <div class="buscador-contenedor" style="margin-bottom:0">
         <span class="buscador-icono">🔍</span>
-        <input type="text" class="buscador-input" id="buscarCliente" placeholder="Buscar por nombre o DNI...">
+        <input type="text" class="buscador-input" id="buscarCliente" placeholder="Buscar por nombre, DNI o código...">
       </div>
     </div>
 
@@ -84,6 +84,7 @@
         <table class="tabla">
           <thead>
             <tr>
+              <th>Código</th>
               <th>Nombre</th>
               <th>DNI</th>
               <th>Teléfono</th>
@@ -94,7 +95,7 @@
             </tr>
           </thead>
           <tbody id="tablaClientes">
-            <tr><td colspan="7"><div class="cargando"><div class="spinner"></div><span>Cargando clientes...</span></div></td></tr>
+            <tr><td colspan="8"><div class="cargando"><div class="spinner"></div><span>Cargando clientes...</span></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -115,6 +116,13 @@
       <button class="modal-cerrar" onclick="cerrarModal('modalCliente')">✕</button>
     </div>
 
+    <div class="form-grupo">
+      <label class="form-label">Código de cliente
+        <span id="cliCodigoSugerencia" style="font-size:11px;font-weight:400;color:var(--azul-accion);margin-left:8px"></span>
+      </label>
+      <input type="text" id="cliCodigo" class="form-input" placeholder="Ej: CLI-001">
+      <div class="form-error" id="errorCodigo" style="display:none">Ya existe un cliente con ese código.</div>
+    </div>
     <div class="form-grupo">
       <label class="form-label">Nombre completo *</label>
       <input type="text" id="cliNombre" class="form-input" placeholder="Ej: María González">
@@ -225,15 +233,15 @@
 
   async function cargarClientes(query = '') {
     const tbody = document.getElementById('tablaClientes');
-    tbody.innerHTML = '<tr><td colspan="7"><div class="cargando"><div class="spinner"></div></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8"><div class="cargando"><div class="spinner"></div></div></td></tr>';
 
     let q = sb.from('clientes').select('*').eq('activo', true).order('nombre');
-    if (query) q = q.or(`nombre.ilike.%${query}%,dni.ilike.%${query}%`);
+    if (query) q = q.or(`nombre.ilike.%${query}%,dni.ilike.%${query}%,codigo_cliente.ilike.%${query}%`);
 
     const { data, error } = await q;
 
     if (error) {
-      tbody.innerHTML = `<tr><td colspan="7">
+      tbody.innerHTML = `<tr><td colspan="8">
         <div class="estado-vacio">
           <div class="estado-vacio-icono">⚠️</div>
           <div class="estado-vacio-titulo">Error al cargar clientes</div>
@@ -245,7 +253,7 @@
     }
 
     if (!data || data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7">
+      tbody.innerHTML = `<tr><td colspan="8">
         <div class="estado-vacio">
           <div class="estado-vacio-icono">👥</div>
           <div class="estado-vacio-titulo">${query ? 'Sin resultados' : 'Sin clientes registrados'}</div>
@@ -274,6 +282,11 @@
       return `
         <tr>
           <td>
+            ${c.codigo_cliente
+              ? `<span class="badge badge-azul" style="font-size:12px;font-weight:700">${c.codigo_cliente}</span>`
+              : '<span class="texto-suave" style="font-size:12px">—</span>'}
+          </td>
+          <td>
             <div class="fw-600" style="font-size:16px">${c.nombre}</div>
           </td>
           <td class="fw-600">${c.dni}</td>
@@ -293,15 +306,45 @@
     }).join('');
   }
 
-  function abrirNuevoCliente() {
+  async function abrirNuevoCliente() {
     clienteActual = null;
     modoEdicion = false;
     document.getElementById('modalClienteTitulo').textContent = '👥 Nuevo Cliente';
+    document.getElementById('cliCodigo').value = '';
     document.getElementById('cliNombre').value = '';
     document.getElementById('cliDni').value = '';
     document.getElementById('cliTelefono').value = '';
     document.getElementById('cliDireccion').value = '';
+    document.getElementById('errorCodigo').style.display = 'none';
+    // Sugerir el siguiente código consecutivo
+    await sugerirCodigoCliente();
     abrirModal('modalCliente');
+  }
+
+  async function sugerirCodigoCliente() {
+    // Obtener el último código numérico registrado
+    const { data } = await sb.from('clientes')
+      .select('codigo_cliente')
+      .not('codigo_cliente', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    let siguiente = 1;
+    if (data && data.length > 0) {
+      // Extraer números de los códigos existentes y encontrar el máximo
+      const nums = data
+        .map(c => {
+          const m = (c.codigo_cliente || '').match(/(\d+)$/);
+          return m ? parseInt(m[1]) : 0;
+        })
+        .filter(n => n > 0);
+      if (nums.length > 0) siguiente = Math.max(...nums) + 1;
+    }
+    const sugerido = String(siguiente).padStart(3, '0');
+    document.getElementById('cliCodigoSugerencia').textContent = `(sugerido: CLI-${sugerido})`;
+    // Pre-completar si el campo está vacío
+    const campo = document.getElementById('cliCodigo');
+    if (!campo.value) campo.value = `CLI-${sugerido}`;
   }
 
   function editarCliente(id) {
@@ -309,33 +352,55 @@
     if (!clienteActual) return;
     modoEdicion = true;
     document.getElementById('modalClienteTitulo').textContent = '✏️ Editar Cliente';
+    document.getElementById('cliCodigo').value = clienteActual.codigo_cliente || '';
     document.getElementById('cliNombre').value = clienteActual.nombre;
     document.getElementById('cliDni').value = clienteActual.dni;
     document.getElementById('cliTelefono').value = clienteActual.telefono || '';
     document.getElementById('cliDireccion').value = clienteActual.direccion || '';
+    document.getElementById('cliCodigoSugerencia').textContent = '';
+    document.getElementById('errorCodigo').style.display = 'none';
     abrirModal('modalCliente');
   }
 
   async function guardarCliente() {
+    const codigo = document.getElementById('cliCodigo').value.trim();
     const nombre = document.getElementById('cliNombre').value.trim();
     const dni = document.getElementById('cliDni').value.trim();
     const telefono = document.getElementById('cliTelefono').value.trim();
     const direccion = document.getElementById('cliDireccion').value.trim();
 
+    // Ocultar error de código previo
+    document.getElementById('errorCodigo').style.display = 'none';
+    document.getElementById('cliCodigo').classList.remove('error');
+
     if (!nombre) { mostrarAlerta('El nombre es obligatorio.', 'error'); return; }
     if (!dni) { mostrarAlerta('El DNI es obligatorio.', 'error'); return; }
+
+    // Validar código duplicado (si se ingresó uno)
+    if (codigo) {
+      let qCod = sb.from('clientes').select('id').eq('codigo_cliente', codigo).eq('activo', true);
+      if (modoEdicion && clienteActual) qCod = qCod.neq('id', clienteActual.id);
+      const { data: dup } = await qCod.maybeSingle();
+      if (dup) {
+        document.getElementById('errorCodigo').style.display = 'block';
+        document.getElementById('cliCodigo').classList.add('error');
+        mostrarAlerta('Ya existe un cliente con ese código.', 'error');
+        return;
+      }
+    }
 
     const btn = document.getElementById('btnGuardarCliente');
     btn.disabled = true;
     btn.textContent = 'Guardando...';
 
     try {
+      const payload = { nombre, dni, telefono, direccion, codigo_cliente: codigo || null };
       if (modoEdicion && clienteActual) {
-        const { error } = await sb.from('clientes').update({ nombre, dni, telefono, direccion }).eq('id', clienteActual.id);
+        const { error } = await sb.from('clientes').update(payload).eq('id', clienteActual.id);
         if (error) throw error;
         mostrarAlerta('Cliente actualizado.', 'exito');
       } else {
-        const { error } = await sb.from('clientes').insert({ nombre, dni, telefono, direccion });
+        const { error } = await sb.from('clientes').insert(payload);
         if (error) {
           if (error.code === '23505') { mostrarAlerta('Ya existe un cliente con ese DNI.', 'error'); return; }
           throw error;
@@ -391,6 +456,11 @@
 
     contenido.innerHTML = `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px">
+        ${cliente.codigo_cliente ? `
+        <div style="padding:16px;background:#dbeafe;border-radius:var(--r-sm);grid-column:1/-1;display:flex;align-items:center;gap:10px">
+          <div class="texto-suave" style="font-size:13px">Código</div>
+          <div class="fw-700" style="font-size:18px;color:#1d4ed8">${cliente.codigo_cliente}</div>
+        </div>` : ''}
         <div style="padding:16px;background:var(--bg);border-radius:var(--r-sm)">
           <div class="texto-suave" style="font-size:13px">DNI</div>
           <div class="fw-600" style="font-size:16px">${cliente.dni}</div>
