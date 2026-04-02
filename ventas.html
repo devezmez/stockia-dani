@@ -197,12 +197,18 @@
               <label class="form-label">Nombre del vendedor (opcional)</label>
               <input type="text" id="vendedorNombre" class="form-input" placeholder="Ej: Juan Pérez">
             </div>
-            <div class="form-grupo" style="margin-bottom:0">
+            <div class="form-grupo">
               <label class="form-label">Número / Código de venta
                 <span id="nroVentaSugerencia" style="font-size:11px;font-weight:400;color:var(--azul-accion);margin-left:8px"></span>
               </label>
               <input type="text" id="nroVenta" class="form-input" placeholder="Ej: VTA-001">
               <div id="errorNroVenta" style="display:none;color:var(--rojo);font-size:12px;margin-top:4px">Ya existe una venta con ese número.</div>
+            </div>
+            <div class="form-grupo" style="margin-bottom:0">
+              <label class="form-label">📅 Fecha de la venta
+                <span style="font-size:11px;font-weight:400;color:var(--texto-suave);margin-left:6px">(podés cargar compras pasadas)</span>
+              </label>
+              <input type="date" id="fechaVenta" class="form-input">
             </div>
           </div>
 
@@ -296,12 +302,77 @@
 
 <!-- MODAL: Historial de pagos -->
 <div class="modal-overlay" id="modalHistorialPagos">
-  <div class="modal" style="max-width:650px">
+  <div class="modal" style="max-width:700px">
     <div class="modal-header">
       <h2 class="modal-titulo">📋 Historial de Pagos</h2>
       <button class="modal-cerrar" onclick="cerrarModal('modalHistorialPagos')">✕</button>
     </div>
     <div id="historialPagosContenido"></div>
+  </div>
+</div>
+
+<!-- MODAL: Editar Venta -->
+<div class="modal-overlay" id="modalEditarVenta">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-titulo">✏️ Editar Venta</h2>
+      <button class="modal-cerrar" onclick="cerrarModal('modalEditarVenta')">✕</button>
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Número / Código de venta</label>
+      <input type="text" id="editNroVenta" class="form-input" placeholder="Ej: VTA-001">
+      <div id="editErrorNroVenta" style="display:none;color:var(--rojo);font-size:12px;margin-top:4px">Ya existe una venta con ese número.</div>
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Vendedor</label>
+      <input type="text" id="editVendedor" class="form-input" placeholder="Nombre del vendedor">
+    </div>
+    <div class="form-grupo" style="margin-bottom:0">
+      <label class="form-label">📅 Fecha de la venta</label>
+      <input type="date" id="editFechaVenta" class="form-input">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalEditarVenta')">Cancelar</button>
+      <button class="btn btn-primario" id="btnGuardarEditVenta" onclick="guardarEditarVenta()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirmar eliminar venta -->
+<div class="modal-overlay" id="modalEliminarVenta">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-titulo" style="color:var(--rojo)">🗑️ Eliminar Venta</h2>
+      <button class="modal-cerrar" onclick="cerrarModal('modalEliminarVenta')">✕</button>
+    </div>
+    <div id="infoEliminarVenta" style="background:#fee2e2;border-radius:var(--r-sm);padding:16px;margin-bottom:20px"></div>
+
+    <!-- Pregunta stock -->
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:16px;margin-bottom:20px">
+      <p style="font-size:14px;font-weight:600;margin-bottom:12px">📦 ¿Devolver el stock al inventario?</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px">
+          <input type="radio" name="opcionStock" value="si" style="margin-top:3px;accent-color:var(--verde)">
+          <span><strong>Sí, devolver stock</strong><br>
+            <span class="texto-suave" style="font-size:12px">Los productos vuelven al inventario disponible</span>
+          </span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px">
+          <input type="radio" name="opcionStock" value="no" checked style="margin-top:3px;accent-color:var(--rojo)">
+          <span><strong>No, mantener stock actual</strong><br>
+            <span class="texto-suave" style="font-size:12px">El inventario no se modifica (lo ajusto manualmente)</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--texto-suave);margin-bottom:16px">
+      ⚠️ Esta acción eliminará la venta y todos sus pagos. No se puede deshacer.
+    </p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalEliminarVenta')">Cancelar</button>
+      <button class="btn btn-peligro" id="btnConfirmarEliminarVenta" onclick="ejecutarEliminarVenta()">🗑️ Confirmar eliminación</button>
+    </div>
   </div>
 </div>
 
@@ -403,6 +474,12 @@
     document.getElementById('nroVentaSugerencia').textContent = `(sugerido: VTA-${sugerido})`;
     const campo = document.getElementById('nroVenta');
     if (!campo.value) campo.value = `VTA-${sugerido}`;
+
+    // Inicializar fecha a hoy si no tiene valor
+    const campoFecha = document.getElementById('fechaVenta');
+    if (!campoFecha.value) {
+      campoFecha.value = new Date().toISOString().split('T')[0];
+    }
   }
 
   async function cargarProductosCatalogo() {
@@ -421,7 +498,7 @@
         proxima_fecha_pago, created_at, porcentaje_recargo, precio_base_total,
         dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin,
         productos(nombre),
-        ventas(id, vendedor, nro_venta, clientes(nombre))
+        ventas(id, vendedor, nro_venta, fecha_venta, clientes(nombre))
       `)
       .in('estado', ['activo', 'pagado'])
       .order('created_at', { ascending: false })
@@ -462,7 +539,7 @@
             ? `<span class="badge badge-azul" style="font-size:12px;font-weight:700">${v.ventas.nro_venta}</span>`
             : '<span class="texto-suave" style="font-size:12px">—</span>'}
         </td>
-        <td class="texto-suave">${formatoFecha(v.created_at)}</td>
+        <td class="texto-suave">${formatoFecha(v.ventas?.fecha_venta || v.created_at)}</td>
         <td class="fw-600">${v.ventas?.clientes?.nombre || '-'}</td>
         <td>${v.productos?.nombre || '-'}</td>
         <td class="texto-suave">${v.ventas?.vendedor || '<span style="color:var(--borde)">—</span>'}</td>
@@ -481,7 +558,9 @@
             ${v.estado === 'activo' && Number(v.deuda_restante) > 0
               ? `<button class="btn btn-acento btn-sm" onclick="abrirModalPago('${v.id}')">💳 Pagar</button>`
               : ''}
-            <button class="btn btn-ghost btn-sm" onclick="verHistorialPagos('${v.id}')">📋</button>
+            <button class="btn btn-ghost btn-sm" onclick="verHistorialPagos('${v.id}')" title="Historial de pagos">📋</button>
+            <button class="btn btn-ghost btn-sm" onclick="abrirEditarVenta('${v.ventas?.id}')" title="Editar venta">✏️</button>
+            <button class="btn btn-peligro btn-sm" onclick="confirmarEliminarVenta('${v.ventas?.id}', '${(v.ventas?.nro_venta || '').replace(/'/g,"\\'")}', '${(v.ventas?.clientes?.nombre || '').replace(/'/g,"\\'")}')">🗑️</button>
           </div>
         </td>
       </tr>
@@ -832,13 +911,15 @@
         return a + base + (base * (i.recargo || 0) / 100);
       }, 0);
 
-      // Crear venta (con vendedor y nro_venta)
+      // Crear venta (con vendedor, nro_venta y fecha personalizable)
+      const fechaVenta = document.getElementById('fechaVenta').value;
       const { data: venta, error: errVenta } = await sb.from('ventas').insert({
         cliente_id: clienteVenta.id,
         usuario_id: usuario.id,
         total_venta: totalVenta,
         vendedor: vendedor || null,
-        nro_venta: nroVenta || null
+        nro_venta: nroVenta || null,
+        fecha_venta: fechaVenta ? new Date(fechaVenta + 'T12:00:00').toISOString() : new Date().toISOString()
       }).select().single();
 
       if (errVenta) throw errVenta;
@@ -911,6 +992,7 @@
       document.getElementById('nroVenta').value = '';
       document.getElementById('nroVentaSugerencia').textContent = '';
       document.getElementById('errorNroVenta').style.display = 'none';
+      document.getElementById('fechaVenta').value = new Date().toISOString().split('T')[0];
       limpiarCliente();
       renderizarItems();
       actualizarResumen();
@@ -1095,6 +1177,7 @@
 
     const contenido = document.getElementById('historialPagosContenido');
     const tieneMora = item?.porcentaje_mora > 0 || item?.porcentaje_gasto_admin > 0;
+    const ventaItemIdRef = ventaItemId; // para usar en eliminación
 
     contenido.innerHTML = `
       <div style="background:var(--bg);border-radius:var(--r-sm);padding:16px;margin-bottom:20px">
@@ -1119,6 +1202,7 @@
                 <th>Total pagado</th>
                 <th>Estado</th>
                 <th>Notas</th>
+                <th>Eliminar</th>
               </tr>
             </thead>
             <tbody>
@@ -1134,6 +1218,11 @@
                   <td class="fw-600 texto-verde">${formatoPeso(p.monto)}</td>
                   <td>${p.tuvo_mora ? '<span class="badge badge-rojo">⚠ Con mora</span>' : '<span class="badge badge-verde">✓ En término</span>'}</td>
                   <td class="texto-suave">${p.notas || '-'}</td>
+                  <td>
+                    <button class="btn btn-peligro btn-sm"
+                      onclick="eliminarPago('${p.id}', '${ventaItemIdRef}', ${formatoPeso(p.monto).replace(/[^0-9,.]/g, '')})"
+                      title="Eliminar este pago">🗑️</button>
+                  </td>
                 </tr>
               `).join('')}
             </tbody>
@@ -1143,6 +1232,134 @@
     `;
 
     abrirModal('modalHistorialPagos');
+  }
+
+  // ---- EDITAR VENTA ----
+  let ventaEditandoId = null;
+
+  async function abrirEditarVenta(ventaId) {
+    if (!ventaId || ventaId === 'undefined') { mostrarAlerta('No se pudo identificar la venta.', 'error'); return; }
+    ventaEditandoId = ventaId;
+
+    const { data, error } = await sb.from('ventas')
+      .select('nro_venta, vendedor, fecha_venta')
+      .eq('id', ventaId).single();
+
+    if (error || !data) { mostrarAlerta('Error al cargar la venta.', 'error'); return; }
+
+    document.getElementById('editNroVenta').value = data.nro_venta || '';
+    document.getElementById('editVendedor').value = data.vendedor || '';
+    document.getElementById('editFechaVenta').value = data.fecha_venta
+      ? data.fecha_venta.split('T')[0]
+      : new Date().toISOString().split('T')[0];
+    document.getElementById('editErrorNroVenta').style.display = 'none';
+    document.getElementById('editNroVenta').classList.remove('error');
+    abrirModal('modalEditarVenta');
+  }
+
+  async function guardarEditarVenta() {
+    if (!ventaEditandoId) return;
+    const nroVenta  = document.getElementById('editNroVenta').value.trim();
+    const vendedor  = document.getElementById('editVendedor').value.trim();
+    const fechaVenta = document.getElementById('editFechaVenta').value;
+
+    // Validar nro_venta duplicado
+    document.getElementById('editErrorNroVenta').style.display = 'none';
+    document.getElementById('editNroVenta').classList.remove('error');
+    if (nroVenta) {
+      const { data: dup } = await sb.from('ventas')
+        .select('id').eq('nro_venta', nroVenta).neq('id', ventaEditandoId).maybeSingle();
+      if (dup) {
+        document.getElementById('editErrorNroVenta').style.display = 'block';
+        document.getElementById('editNroVenta').classList.add('error');
+        mostrarAlerta('Ya existe una venta con ese número.', 'error');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('btnGuardarEditVenta');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+
+    try {
+      const { error } = await sb.from('ventas').update({
+        nro_venta:   nroVenta || null,
+        vendedor:    vendedor || null,
+        fecha_venta: fechaVenta ? new Date(fechaVenta + 'T12:00:00').toISOString() : null
+      }).eq('id', ventaEditandoId);
+
+      if (error) throw error;
+      mostrarAlerta('Venta actualizada correctamente.', 'exito');
+      cerrarModal('modalEditarVenta');
+      await cargarVentas(document.getElementById('buscarVenta').value.trim());
+    } catch (err) {
+      mostrarAlerta('Error al guardar los cambios.', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = '💾 Guardar cambios';
+    }
+  }
+
+  // ---- ELIMINAR PAGO ----
+  async function eliminarPago(pagoId, ventaItemId, montoStr) {
+    if (!confirm(`¿Eliminar este pago? La deuda del cliente se actualizará automáticamente.`)) return;
+
+    try {
+      // Llamar a la función RPC de Supabase
+      const { error } = await sb.rpc('revertir_pago', { p_pago_id: pagoId });
+      if (error) throw error;
+
+      mostrarAlerta('Pago eliminado. Deuda restaurada.', 'exito');
+      // Recargar el historial de pagos del mismo item
+      await verHistorialPagos(ventaItemId);
+      await cargarVentas(document.getElementById('buscarVenta').value.trim());
+    } catch (err) {
+      mostrarAlerta('Error al eliminar el pago: ' + err.message, 'error');
+    }
+  }
+
+  // ---- ELIMINAR VENTA ----
+  let ventaEliminarId = null;
+
+  function confirmarEliminarVenta(ventaId, nroVenta, nombreCliente) {
+    if (!ventaId || ventaId === 'undefined') { mostrarAlerta('No se pudo identificar la venta.', 'error'); return; }
+    ventaEliminarId = ventaId;
+
+    document.getElementById('infoEliminarVenta').innerHTML = `
+      <div style="font-size:15px;font-weight:700;color:var(--rojo);margin-bottom:6px">
+        ${nroVenta ? `Venta ${nroVenta}` : 'Esta venta'}
+      </div>
+      <div style="font-size:14px;color:var(--texto-suave)">
+        Cliente: <strong>${nombreCliente || '-'}</strong>
+      </div>
+    `;
+    abrirModal('modalEliminarVenta');
+  }
+
+  async function ejecutarEliminarVenta() {
+    if (!ventaEliminarId) return;
+    const btn = document.getElementById('btnConfirmarEliminarVenta');
+    btn.disabled = true; btn.textContent = 'Eliminando...';
+
+    // Leer opción de stock
+    const opcionStock = document.querySelector('input[name="opcionStock"]:checked')?.value;
+    const devolverStock = opcionStock === 'si';
+
+    try {
+      const { error } = await sb.rpc('eliminar_venta', {
+        p_venta_id: ventaEliminarId,
+        p_devolver_stock: devolverStock
+      });
+      if (error) throw error;
+
+      const msgStock = devolverStock ? 'Stock devuelto al inventario.' : 'Stock no modificado.';
+      mostrarAlerta(`Venta eliminada. ${msgStock}`, 'exito');
+      cerrarModal('modalEliminarVenta');
+      await cargarVentas(document.getElementById('buscarVenta').value.trim());
+      if (devolverStock) await cargarProductosCatalogo();
+    } catch (err) {
+      mostrarAlerta('Error al eliminar la venta: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = '🗑️ Confirmar eliminación';
+    }
   }
 
   init();
