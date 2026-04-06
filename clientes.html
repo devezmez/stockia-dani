@@ -160,6 +160,40 @@
   </div>
 </div>
 
+<!-- MODAL: Confirmar eliminación de cliente -->
+<div class="modal-overlay" id="modalEliminarCliente">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-titulo" style="color:var(--rojo)">🗑️ Eliminar Cliente</h2>
+      <button class="modal-cerrar" onclick="cerrarModal('modalEliminarCliente')">✕</button>
+    </div>
+    <div id="infoEliminarCliente" style="background:#fee2e2;border-radius:var(--r-sm);padding:14px 16px;margin-bottom:20px;font-size:15px;font-weight:600;color:var(--rojo)"></div>
+
+    <p style="font-size:14px;font-weight:600;margin-bottom:12px">¿Qué querés hacer?</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;padding:12px;border:2px solid var(--borde);border-radius:var(--r-sm)" id="opcionBajaLabel">
+        <input type="radio" name="opcionCliente" value="baja" checked style="margin-top:3px;accent-color:var(--azul-nav)">
+        <span>
+          <strong>Dar de baja (recomendado)</strong><br>
+          <span class="texto-suave" style="font-size:12px">El cliente queda inactivo. Sus ventas e historial se conservan. Podés reactivarlo después.</span>
+        </span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;padding:12px;border:2px solid var(--borde);border-radius:var(--r-sm)" id="opcionEliminarLabel">
+        <input type="radio" name="opcionCliente" value="eliminar" style="margin-top:3px;accent-color:var(--rojo)">
+        <span>
+          <strong style="color:var(--rojo)">Eliminar definitivamente</strong><br>
+          <span class="texto-suave" style="font-size:12px">⚠️ Se borra el cliente y todo su historial. Esta acción no se puede deshacer.</span>
+        </span>
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalEliminarCliente')">Cancelar</button>
+      <button class="btn btn-peligro" id="btnConfirmarEliminarCliente" onclick="ejecutarEliminarCliente()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <script>
     var SUPABASE_URL = 'https://gkwtspgbpqjwvyalwymc.supabase.co';
     var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrd3RzcGdicHFqd3Z5YWx3eW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3MTgsImV4cCI6MjA5MDE5NDcxOH0.b0BOSZApkFBiNVHrusCltKJtx_lGCf9cRncxUn8jr7U';
@@ -298,7 +332,7 @@
             <div class="tabla-acciones">
               <button class="btn btn-ghost btn-sm" onclick="verDetalleCliente('${c.id}')" title="Ver detalle">👁️</button>
               <button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id}')" title="Editar">✏️</button>
-              ${perfilActual?.rol === 'admin' ? `<button class="btn btn-peligro btn-sm" onclick="eliminarCliente('${c.id}', '${c.nombre.replace(/'/g, "\\'")}')" title="Eliminar">🗑️</button>` : ''}
+              ${perfilActual?.rol === 'admin' ? `<button class="btn btn-peligro btn-sm" onclick="abrirEliminarCliente('${c.id}', '${c.nombre.replace(/'/g, "\\'")}')" title="Eliminar">🗑️</button>` : ''}
             </div>
           </td>
         </tr>
@@ -417,12 +451,61 @@
     }
   }
 
+  let clienteEliminarId = null;
+
+  function abrirEliminarCliente(id, nombre) {
+    clienteEliminarId = id;
+    document.getElementById('infoEliminarCliente').textContent = `Cliente: ${nombre}`;
+    // Resetear selección a "baja" por defecto
+    document.querySelector('input[name="opcionCliente"][value="baja"]').checked = true;
+    abrirModal('modalEliminarCliente');
+  }
+
+  async function ejecutarEliminarCliente() {
+    if (!clienteEliminarId) return;
+    const opcion = document.querySelector('input[name="opcionCliente"]:checked')?.value;
+    const btn = document.getElementById('btnConfirmarEliminarCliente');
+    btn.disabled = true; btn.textContent = 'Procesando...';
+
+    try {
+      if (opcion === 'baja') {
+        // Soft delete: marcar como inactivo
+        const { error } = await sb.from('clientes').update({ activo: false }).eq('id', clienteEliminarId);
+        if (error) throw error;
+        mostrarAlerta('Cliente dado de baja. Sus datos se conservan.', 'exito');
+      } else {
+        // Hard delete: eliminar definitivamente
+        // Primero verificar si tiene ventas activas
+        const { data: ventasActivas } = await sb
+          .from('venta_items')
+          .select('id', { count: 'exact', head: true })
+          .eq('estado', 'activo')
+          .in('venta_id', (
+            await sb.from('ventas').select('id').eq('cliente_id', clienteEliminarId)
+          ).data?.map(v => v.id) || []);
+
+        if (ventasActivas && ventasActivas.length > 0) {
+          mostrarAlerta('No se puede eliminar: el cliente tiene ventas activas con deuda pendiente.', 'error');
+          return;
+        }
+
+        const { error } = await sb.from('clientes').delete().eq('id', clienteEliminarId);
+        if (error) throw error;
+        mostrarAlerta('Cliente eliminado definitivamente.', 'exito');
+      }
+      cerrarModal('modalEliminarCliente');
+      await cargarClientes(document.getElementById('buscarCliente').value.trim());
+    } catch (err) {
+      mostrarAlerta('Error al procesar la operación.', 'error');
+      console.error(err);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirmar';
+    }
+  }
+
+  // Mantener función vieja por compatibilidad (ya no se usa desde la tabla)
   async function eliminarCliente(id, nombre) {
-    if (!confirm(`¿Desactivar al cliente "${nombre}"?`)) return;
-    const { error } = await sb.from('clientes').update({ activo: false }).eq('id', id);
-    if (error) { mostrarAlerta('Error al eliminar.', 'error'); return; }
-    mostrarAlerta('Cliente eliminado.', 'exito');
-    await cargarClientes(document.getElementById('buscarCliente').value.trim());
+    abrirEliminarCliente(id, nombre);
   }
 
   async function verDetalleCliente(id) {

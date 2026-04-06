@@ -186,77 +186,84 @@
 
     <!-- NUEVA VENTA -->
     <div id="seccionNueva" style="display:none">
-      <div style="display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start">
+      <div style="max-width:680px; margin:0 auto">
 
-        <!-- Formulario -->
-        <div>
-        <!-- Vendedor + Nro Venta -->
-          <div class="card mb-24">
-            <div class="card-titulo">🧑‍💼 Paso 1: Datos de la venta</div>
-            <div class="form-grupo">
-              <label class="form-label">Nombre del vendedor (opcional)</label>
-              <input type="text" id="vendedorNombre" class="form-input" placeholder="Ej: Juan Pérez">
-            </div>
-            <div class="form-grupo">
-              <label class="form-label">Número / Código de venta
-                <span id="nroVentaSugerencia" style="font-size:11px;font-weight:400;color:var(--azul-accion);margin-left:8px"></span>
-              </label>
-              <input type="text" id="nroVenta" class="form-input" placeholder="Ej: VTA-001">
-              <div id="errorNroVenta" style="display:none;color:var(--rojo);font-size:12px;margin-top:4px">Ya existe una venta con ese número.</div>
+        <div class="card">
+          <div class="card-titulo" style="font-size:18px">🛒 Nueva Venta</div>
+
+          <!-- Fecha y Nro -->
+          <div class="form-fila" style="gap:14px; margin-bottom:14px">
+            <div class="form-grupo" style="margin-bottom:0">
+              <label class="form-label">📅 Fecha</label>
+              <input type="date" id="fechaVenta" class="form-input">
+              <div style="font-size:11px;color:var(--texto-suave);margin-top:3px">Por defecto es hoy. Cambiala para cargar ventas pasadas.</div>
             </div>
             <div class="form-grupo" style="margin-bottom:0">
-              <label class="form-label">📅 Fecha de la venta
-                <span style="font-size:11px;font-weight:400;color:var(--texto-suave);margin-left:6px">(podés cargar compras pasadas)</span>
+              <label class="form-label">Código / Nº de venta
+                <span id="nroVentaSugerencia" style="font-size:11px;font-weight:400;color:var(--azul-accion);margin-left:6px;cursor:pointer" onclick="usarSugerido()"></span>
               </label>
-              <input type="date" id="fechaVenta" class="form-input">
+              <input type="text" id="nroVenta" class="form-input" placeholder="Ej: 1001">
+              <div id="errorNroVenta" style="display:none;color:var(--rojo);font-size:12px;margin-top:3px">Ya existe una venta con ese número.</div>
             </div>
           </div>
 
-          <!-- Cliente -->
-          <div class="card mb-24">
-            <div class="card-titulo">👥 Paso 2: Seleccionar cliente</div>
-            <div class="buscador-contenedor">
-              <span class="buscador-icono">🔍</span>
-              <input type="text" class="buscador-input" id="buscarClienteVenta" placeholder="Nombre o DNI del cliente...">
+          <!-- Cliente (opcional) -->
+          <div class="form-grupo">
+            <label class="form-label">Cliente <span class="texto-suave" style="font-weight:400;font-size:12px">(opcional)</span></label>
+            <div style="position:relative">
+              <input type="text" class="form-input" id="buscarClienteVenta" placeholder="— Consumidor final —" autocomplete="off">
             </div>
-            <div id="resultadosClienteVenta"></div>
-            <div id="clienteSeleccionado" style="display:none; padding:16px; background:var(--bg); border-radius:var(--r-sm); margin-top:8px">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                  <div class="fw-700" style="font-size:17px" id="clienteSelNombre"></div>
-                  <div class="texto-suave" id="clienteSelDni"></div>
-                </div>
-                <button class="btn btn-ghost btn-sm" onclick="limpiarCliente()">✕ Cambiar</button>
+            <div id="resultadosClienteVenta" style="position:relative;z-index:10"></div>
+            <div id="clienteSeleccionado" style="display:none;margin-top:6px;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);display:none;align-items:center;justify-content:space-between">
+              <div>
+                <span class="fw-700" id="clienteSelNombre"></span>
+                <span class="texto-suave" style="font-size:13px;margin-left:8px" id="clienteSelDni"></span>
               </div>
+              <button class="btn btn-ghost btn-sm" onclick="limpiarCliente()">✕</button>
             </div>
           </div>
 
-          <!-- Productos -->
-          <div class="card mb-24">
-            <div class="card-titulo">📦 Paso 3: Agregar productos</div>
-            <div style="display:flex;gap:12px;margin-bottom:16px">
-              <div style="flex:1;position:relative">
-                <span class="buscador-icono" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--texto-suave)">🔍</span>
-                <input type="text" class="buscador-input" id="buscarProductoVenta" placeholder="Buscar producto..." style="margin-bottom:0">
-              </div>
+          <!-- Buscador de productos -->
+          <div class="form-grupo">
+            <label class="form-label">Agregar artículos</label>
+            <div style="position:relative">
+              <input type="text" class="form-input" id="buscarProductoVenta"
+                placeholder="Escribí para buscar artículo..."
+                style="padding-left:40px" autocomplete="off">
+              <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none">🔍</span>
             </div>
-            <div id="resultadosProductoVenta" style="margin-bottom:16px"></div>
-            <div id="itemsVenta"></div>
+            <div id="resultadosProductoVenta" style="position:relative;z-index:10;margin-top:4px"></div>
           </div>
-        </div>
 
-        <!-- Resumen -->
-        <div style="position:sticky;top:88px">
-          <div class="card">
-            <div class="card-titulo">📋 Resumen de venta</div>
-            <div id="resumenVenta">
-              <p class="texto-suave" style="font-size:14px;padding:20px 0;text-align:center">Seleccioná un cliente y agregá productos para ver el resumen.</p>
-            </div>
-            <div id="btnConfirmarVentaArea" style="display:none;margin-top:16px">
-              <button class="btn btn-acento w-100 btn-lg" id="btnConfirmarVenta" onclick="confirmarVenta()">
-                ✅ Confirmar Venta
-              </button>
-            </div>
+          <!-- Tabla de artículos -->
+          <div id="ticketItems" style="margin-bottom:16px">
+            <p class="texto-suave" style="font-size:13px;text-align:center;padding:16px 0">Aún no agregaste artículos.</p>
+          </div>
+
+          <!-- Total del ticket -->
+          <div id="ticketTotal" style="display:none;background:var(--azul-nav);color:white;border-radius:var(--r-md);padding:14px 18px;display:none;justify-content:space-between;align-items:center;margin-bottom:20px;font-weight:700;font-size:16px">
+            <span>Total del ticket</span>
+            <span id="ticketTotalValor">$ 0</span>
+          </div>
+
+          <!-- Vendedor -->
+          <div class="form-grupo">
+            <label class="form-label">Vendedor <span class="texto-suave" style="font-weight:400;font-size:12px">(opcional)</span></label>
+            <input type="text" id="vendedorNombre" class="form-input" placeholder="Nombre del vendedor">
+          </div>
+
+          <!-- Notas -->
+          <div class="form-grupo" style="margin-bottom:20px">
+            <label class="form-label">Notas <span class="texto-suave" style="font-weight:400;font-size:12px">(opcional)</span></label>
+            <textarea id="notasVenta" class="form-textarea" placeholder="Observaciones del ticket" style="min-height:60px"></textarea>
+          </div>
+
+          <!-- Botones -->
+          <div style="display:flex;gap:12px;justify-content:flex-end">
+            <button class="btn btn-ghost" onclick="mostrarTab('listado')">Cancelar</button>
+            <button class="btn btn-acento btn-lg" id="btnConfirmarVenta" onclick="confirmarVenta()" style="width:auto">
+              ✅ Confirmar venta
+            </button>
           </div>
         </div>
 
@@ -456,6 +463,12 @@
     if (tab === 'nueva') sugerirNroVenta();
   }
 
+  function usarSugerido() {
+    const span = document.getElementById('nroVentaSugerencia');
+    const m = span.textContent.match(/Nº\s*(\S+)/);
+    if (m) document.getElementById('nroVenta').value = m[1];
+  }
+
   async function sugerirNroVenta() {
     const { data } = await sb.from('ventas')
       .select('nro_venta')
@@ -620,20 +633,19 @@
   function seleccionarCliente(cliente) {
     clienteVenta = cliente;
     document.getElementById('resultadosClienteVenta').innerHTML = '';
-    document.getElementById('buscarClienteVenta').value = '';
-    document.getElementById('buscarClienteVenta').style.display = 'none';
+    document.getElementById('buscarClienteVenta').value = cliente.nombre;
+    document.getElementById('buscarClienteVenta').style.display = 'block';
     const sel = document.getElementById('clienteSeleccionado');
-    sel.style.display = 'block';
+    sel.style.display = 'flex';
     document.getElementById('clienteSelNombre').textContent = cliente.nombre;
     document.getElementById('clienteSelDni').textContent = 'DNI: ' + cliente.dni;
-    actualizarResumen();
   }
 
   function limpiarCliente() {
     clienteVenta = null;
+    document.getElementById('buscarClienteVenta').value = '';
     document.getElementById('buscarClienteVenta').style.display = 'block';
     document.getElementById('clienteSeleccionado').style.display = 'none';
-    actualizarResumen();
   }
 
   function buscarProductoVenta(query) {
@@ -679,127 +691,140 @@
   }
 
   function renderizarItems() {
-    const container = document.getElementById('itemsVenta');
+  function renderizarItems() {
+    const container = document.getElementById('ticketItems');
+    const ticketTotal = document.getElementById('ticketTotal');
 
     if (itemsVenta.length === 0) {
-      container.innerHTML = '<p class="texto-suave" style="padding:12px 0;font-size:14px">Sin productos agregados.</p>';
+      container.innerHTML = '<p class="texto-suave" style="font-size:13px;text-align:center;padding:16px 0">Aún no agregaste artículos.</p>';
+      ticketTotal.style.display = 'none';
       return;
     }
 
-    container.innerHTML = itemsVenta.map(item => {
+    // Cabecera de la tabla ticket
+    let html = `
+      <div style="border:1px solid var(--borde);border-radius:var(--r-sm);overflow:hidden;margin-bottom:0">
+        <div style="display:grid;grid-template-columns:1fr 90px 110px 100px 36px;gap:0;background:var(--bg);padding:8px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--texto-suave)">
+          <span>ARTÍCULO</span><span style="text-align:center">CANTIDAD</span><span style="text-align:right">PRECIO</span><span style="text-align:right">SUBTOTAL</span><span></span>
+        </div>`;
+
+    itemsVenta.forEach(item => {
       const totalBase = item.precio * item.cantidad;
-      const recargoPct = item.recargo || 0;
+      const recargoPct = item.forma_pago !== 'contado' ? (item.recargo || 0) : 0;
       const montoRecargo = totalBase * recargoPct / 100;
       const totalConRecargo = totalBase + montoRecargo;
       const cuotaValor = item.cuotas > 0 ? totalConRecargo / item.cuotas : totalConRecargo;
+      const esContado = item.forma_pago === 'contado';
 
-      return `
-        <div class="item-venta-card">
-          <button class="eliminar-item" onclick="eliminarItem(${item.id})">🗑️</button>
-          <div class="fw-700" style="font-size:16px;margin-bottom:12px">📦 ${item.producto.nombre}</div>
-          <div class="form-fila" style="gap:12px;margin-bottom:12px">
+      html += `
+        <div style="border-top:1px solid var(--borde)">
+          <!-- Fila principal del artículo -->
+          <div style="display:grid;grid-template-columns:1fr 90px 110px 100px 36px;gap:0;align-items:center;padding:10px 10px">
             <div>
-              <label class="form-label" style="font-size:13px">Cantidad</label>
-              <input type="number" value="${item.cantidad}" min="1" max="${item.producto.stock}"
-                class="form-input" style="font-size:15px;padding:10px"
-                onchange="actualizarItem(${item.id}, 'cantidad', this.value)">
+              <div class="fw-600" style="font-size:14px">${item.producto.nombre}</div>
+              <div style="margin-top:4px">
+                <select style="font-size:12px;border:1px solid var(--borde);border-radius:6px;padding:3px 6px;background:white;color:var(--texto);cursor:pointer"
+                  onchange="actualizarItem(${item.id}, 'forma_pago', this.value)">
+                  <option value="contado"    ${item.forma_pago==='contado'    ? 'selected':''}>💵 Contado/Efectivo</option>
+                  <option value="semanal"    ${item.forma_pago==='semanal'    ? 'selected':''}>📅 Cuotas semanales</option>
+                  <option value="quincenal"  ${item.forma_pago==='quincenal'  ? 'selected':''}>📆 Cuotas quincenales</option>
+                  <option value="mensual"    ${item.forma_pago==='mensual'    ? 'selected':''}>🗓️ Cuotas mensuales</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label class="form-label" style="font-size:13px">Precio unitario (contado)</label>
+            <!-- Cantidad con +/- -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+              <button onclick="actualizarItem(${item.id},'cantidad',${item.cantidad-1})"
+                style="width:24px;height:24px;border:1px solid var(--borde);border-radius:50%;background:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1">−</button>
+              <span class="fw-600" style="min-width:24px;text-align:center">${item.cantidad}</span>
+              <button onclick="actualizarItem(${item.id},'cantidad',${item.cantidad+1})"
+                style="width:24px;height:24px;border:1px solid var(--borde);border-radius:50%;background:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1">+</button>
+            </div>
+            <!-- Precio editable -->
+            <div style="text-align:right">
               <input type="number" value="${item.precio}" min="0" step="0.01"
-                class="form-input" style="font-size:15px;padding:10px"
-                onchange="actualizarItem(${item.id}, 'precio', this.value)">
+                style="width:100%;border:1px solid var(--borde);border-radius:6px;padding:4px 6px;font-size:13px;text-align:right;font-family:var(--font)"
+                onchange="actualizarItem(${item.id},'precio',this.value)">
+            </div>
+            <!-- Subtotal -->
+            <div class="fw-700" style="text-align:right;font-size:14px;color:${esContado ? 'var(--texto)' : 'var(--azul-nav)'}">
+              ${formatoPeso(esContado ? totalBase : totalConRecargo)}
+            </div>
+            <!-- Eliminar -->
+            <div style="text-align:center">
+              <button onclick="eliminarItem(${item.id})"
+                style="width:28px;height:28px;border:none;background:#fee2e2;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:#dc2626">✕</button>
             </div>
           </div>
-          <div class="form-grupo" style="margin-bottom:8px">
-            <label class="form-label" style="font-size:13px">Forma de pago</label>
-            <select class="form-select" style="font-size:15px;padding:10px"
-              onchange="actualizarItem(${item.id}, 'forma_pago', this.value)">
-              <option value="contado" ${item.forma_pago === 'contado' ? 'selected' : ''}>💵 Contado</option>
-              <option value="semanal" ${item.forma_pago === 'semanal' ? 'selected' : ''}>📅 Semanal</option>
-              <option value="quincenal" ${item.forma_pago === 'quincenal' ? 'selected' : ''}>📆 Quincenal</option>
-              <option value="mensual" ${item.forma_pago === 'mensual' ? 'selected' : ''}>🗓️ Mensual</option>
-            </select>
-          </div>
-          ${item.forma_pago !== 'contado' ? `
-            <div class="form-fila" style="gap:12px;margin-bottom:0">
-              <div class="form-grupo" style="margin-bottom:0">
-                <label class="form-label" style="font-size:13px">Cantidad de cuotas</label>
-                <input type="number" value="${item.cuotas}" min="1" max="52"
-                  class="form-input" style="font-size:15px;padding:10px"
-                  onchange="actualizarItem(${item.id}, 'cuotas', this.value)">
-              </div>
-              <div class="form-grupo" style="margin-bottom:0">
-                <label class="form-label" style="font-size:13px">📈 Recargo por cuotas (%)</label>
-                <input type="number" value="${recargoPct}" min="0" max="200" step="0.5"
-                  class="form-input" style="font-size:15px;padding:10px"
-                  placeholder="0"
-                  onchange="actualizarItem(${item.id}, 'recargo', this.value)">
-              </div>
-            </div>
 
-            <!-- Vencimiento y mora -->
-            <div style="margin-top:12px; padding:14px; background:white; border:1px solid var(--borde); border-radius:var(--r-sm)">
-              <div style="font-size:13px;font-weight:700;color:var(--texto-suave);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">⚠️ Condiciones de mora</div>
-              <div class="form-fila" style="gap:12px;margin-bottom:10px">
-                <div>
-                  <label class="form-label" style="font-size:13px">📅 Día de vencimiento mensual</label>
-                  <input type="number" value="${item.dia_vencimiento || ''}" min="1" max="28"
-                    class="form-input" style="font-size:15px;padding:10px"
-                    placeholder="Ej: 15"
-                    onchange="actualizarItem(${item.id}, 'dia_vencimiento', this.value)">
-                  <div style="font-size:12px;color:var(--texto-suave);margin-top:4px">Dejar vacío si no hay fecha fija</div>
-                </div>
-                <div>
-                  <label class="form-label" style="font-size:13px">🔴 % Mora por pago tardío</label>
-                  <input type="number" value="${item.porcentaje_mora || 0}" min="0" max="100" step="0.5"
-                    class="form-input" style="font-size:15px;padding:10px"
-                    placeholder="0"
-                    onchange="actualizarItem(${item.id}, 'porcentaje_mora', this.value)">
-                </div>
+          <!-- Panel de cuotas expandido (solo si no es contado) -->
+          ${!esContado ? `
+          <div style="margin:0 10px 12px;background:#f0f4ff;border-radius:var(--r-sm);padding:12px;font-size:13px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--texto-suave);display:block;margin-bottom:4px">Nº de cuotas</label>
+                <input type="number" value="${item.cuotas}" min="1" max="52"
+                  style="width:100%;border:1px solid var(--borde);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--font)"
+                  onchange="actualizarItem(${item.id},'cuotas',this.value)">
               </div>
               <div>
-                <label class="form-label" style="font-size:13px">📋 % Gastos administrativos (por mora)</label>
-                <input type="number" value="${item.porcentaje_gasto_admin || 0}" min="0" max="100" step="0.5"
-                  class="form-input" style="font-size:15px;padding:10px"
-                  placeholder="0"
-                  onchange="actualizarItem(${item.id}, 'porcentaje_gasto_admin', this.value)">
-                <div style="font-size:12px;color:var(--texto-suave);margin-top:4px">Se suma a la mora solo cuando el pago es fuera de término</div>
+                <label style="font-size:12px;font-weight:600;color:var(--texto-suave);display:block;margin-bottom:4px">Recargo (%)</label>
+                <input type="number" value="${recargoPct}" min="0" max="200" step="0.5" placeholder="0"
+                  style="width:100%;border:1px solid var(--borde);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--font)"
+                  onchange="actualizarItem(${item.id},'recargo',this.value)">
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--texto-suave);display:block;margin-bottom:4px">Día de vencimiento</label>
+                <input type="number" value="${item.dia_vencimiento || ''}" min="1" max="28" placeholder="Ej: 15"
+                  style="width:100%;border:1px solid var(--borde);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--font)"
+                  onchange="actualizarItem(${item.id},'dia_vencimiento',this.value)">
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--texto-suave);display:block;margin-bottom:4px">% Mora</label>
+                <input type="number" value="${item.porcentaje_mora || 0}" min="0" max="100" step="0.5" placeholder="0"
+                  style="width:100%;border:1px solid var(--borde);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--font)"
+                  onchange="actualizarItem(${item.id},'porcentaje_mora',this.value)">
+              </div>
+              <div style="grid-column:1/-1">
+                <label style="font-size:12px;font-weight:600;color:var(--texto-suave);display:block;margin-bottom:4px">% Gastos administrativos (por mora)</label>
+                <input type="number" value="${item.porcentaje_gasto_admin || 0}" min="0" max="100" step="0.5" placeholder="0"
+                  style="width:100%;border:1px solid var(--borde);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--font)"
+                  onchange="actualizarItem(${item.id},'porcentaje_gasto_admin',this.value)">
+              </div>
+            </div>
+            <!-- Resumen de cuota -->
+            <div style="background:white;border-radius:6px;padding:10px;font-size:13px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                <span class="texto-suave">Precio contado:</span><strong>${formatoPeso(totalBase)}</strong>
+              </div>
+              ${recargoPct > 0 ? `<div style="display:flex;justify-content:space-between;margin-bottom:3px;color:#b45309">
+                <span>Recargo ${recargoPct}%:</span><strong>+ ${formatoPeso(montoRecargo)}</strong>
+              </div>` : ''}
+              <div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid var(--borde)">
+                <span class="fw-700">💡 ${item.cuotas} cuota${item.cuotas>1?'s':''} de:</span>
+                <strong style="font-size:15px;color:var(--azul-nav)">${formatoPeso(cuotaValor)}</strong>
               </div>
               ${(item.porcentaje_mora > 0 || item.porcentaje_gasto_admin > 0) ? `
-              <div style="margin-top:10px;padding:10px;background:#FFF7ED;border-radius:var(--r-sm);font-size:13px;color:#92400E">
-                Si paga tarde: cuota ${formatoPeso(cuotaValor)} + mora ${item.porcentaje_mora||0}% + admin ${item.porcentaje_gasto_admin||0}%
-                = <strong>${formatoPeso(cuotaValor * (1 + ((item.porcentaje_mora||0) + (item.porcentaje_gasto_admin||0)) / 100))}</strong>
+              <div style="margin-top:6px;padding:6px 8px;background:#fff7ed;border-radius:4px;font-size:12px;color:#92400e">
+                Si paga tarde: ${formatoPeso(cuotaValor)} + mora ${item.porcentaje_mora||0}% + admin ${item.porcentaje_gasto_admin||0}%
+                = <strong>${formatoPeso(cuotaValor * (1 + ((item.porcentaje_mora||0)+(item.porcentaje_gasto_admin||0))/100))}</strong>
               </div>` : ''}
             </div>
+          </div>` : ''}
+        </div>`;
+    });
 
-            <div class="cuota-preview" style="margin-top:10px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span>Precio contado:</span>
-                <strong>${formatoPeso(totalBase)}</strong>
-              </div>
-              ${recargoPct > 0 ? `
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#B45309">
-                <span>Recargo ${recargoPct}%:</span>
-                <strong>+ ${formatoPeso(montoRecargo)}</strong>
-              </div>` : ''}
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px;padding-top:4px;border-top:1px solid #A7F3D0">
-                <span>Total en cuotas:</span>
-                <strong style="font-size:15px">${formatoPeso(totalConRecargo)}</strong>
-              </div>
-              <div style="font-size:15px;font-weight:700">
-                💡 ${item.cuotas} cuota${item.cuotas > 1 ? 's' : ''} de ${formatoPeso(cuotaValor)}
-                ${item.dia_vencimiento ? `· vence el día <strong>${item.dia_vencimiento}</strong> de cada mes` : ''}
-              </div>
-            </div>
-          ` : `
-            <div style="font-size:14px;color:var(--texto-suave);margin-top:8px">
-              💵 Total contado: <strong style="color:var(--texto);font-size:16px">${formatoPeso(totalBase)}</strong>
-            </div>
-          `}
-        </div>
-      `;
-    }).join('');
+    html += '</div>';
+    container.innerHTML = html;
+
+    // Mostrar total
+    const totalGeneral = itemsVenta.reduce((a, i) => {
+      const base = i.precio * i.cantidad;
+      const rec = i.forma_pago !== 'contado' ? base * (i.recargo||0)/100 : 0;
+      return a + base + rec;
+    }, 0);
+    ticketTotal.style.display = 'flex';
+    document.getElementById('ticketTotalValor').textContent = formatoPeso(totalGeneral);
   }
 
   function actualizarItem(id, campo, valor) {
@@ -823,59 +848,22 @@
     else if (campo === 'porcentaje_mora') item.porcentaje_mora = Math.max(0, Math.min(100, parseFloat(valor) || 0));
     else if (campo === 'porcentaje_gasto_admin') item.porcentaje_gasto_admin = Math.max(0, Math.min(100, parseFloat(valor) || 0));
     renderizarItems();
-    actualizarResumen();
   }
 
   function eliminarItem(id) {
     itemsVenta = itemsVenta.filter(i => i.id !== id);
     renderizarItems();
-    actualizarResumen();
   }
 
   function actualizarResumen() {
-    const container = document.getElementById('resumenVenta');
-    const btnArea = document.getElementById('btnConfirmarVentaArea');
-
-    if (!clienteVenta || itemsVenta.length === 0) {
-      container.innerHTML = '<p class="texto-suave" style="font-size:14px;padding:20px 0;text-align:center">Seleccioná un cliente y agregá productos.</p>';
-      btnArea.style.display = 'none';
-      return;
-    }
-
-    const totalBase = itemsVenta.reduce((a, i) => a + (i.precio * i.cantidad), 0);
-    const totalConRecargo = itemsVenta.reduce((a, i) => {
-      const base = i.precio * i.cantidad;
-      return a + base + (base * (i.recargo || 0) / 100);
-    }, 0);
-    const hayRecargo = itemsVenta.some(i => (i.recargo || 0) > 0 && i.forma_pago !== 'contado');
-
-    container.innerHTML = `
-      <div style="margin-bottom:12px">
-        <div class="texto-suave" style="font-size:13px">Cliente</div>
-        <div class="fw-600">${clienteVenta.nombre}</div>
-      </div>
-      <div class="resumen-venta">
-        ${itemsVenta.map(item => {
-          const base = item.precio * item.cantidad;
-          const conRec = base + base * (item.recargo || 0) / 100;
-          const esContado = item.forma_pago === 'contado';
-          return `<div class="linea">
-            <span>${item.producto.nombre} x${item.cantidad}${!esContado && item.recargo > 0 ? ` <span style="opacity:.7;font-size:12px">(+${item.recargo}%)</span>` : ''}</span>
-            <span>${formatoPeso(esContado ? base : conRec)}</span>
-          </div>`;
-        }).join('')}
-        ${hayRecargo ? `
-          <div class="linea" style="opacity:.75;font-size:13px"><span>Precio contado</span><span>${formatoPeso(totalBase)}</span></div>
-        ` : ''}
-        <div class="linea"><span>TOTAL A COBRAR</span><span>${formatoPeso(totalConRecargo)}</span></div>
-      </div>
-    `;
-
-    btnArea.style.display = 'block';
+    // Ya no se usa — el ticket se actualiza en renderizarItems()
   }
 
   async function confirmarVenta() {
-    if (!clienteVenta || itemsVenta.length === 0) return;
+    if (itemsVenta.length === 0) {
+      mostrarAlerta('Agregá al menos un producto para continuar.', 'error');
+      return;
+    }
 
     // Validar stock
     for (const item of itemsVenta) {
@@ -910,15 +898,17 @@
         const base = i.precio * i.cantidad;
         return a + base + (base * (i.recargo || 0) / 100);
       }, 0);
+      const notas = document.getElementById('notasVenta').value.trim();
 
-      // Crear venta (con vendedor, nro_venta y fecha personalizable)
+      // Crear venta (con vendedor, nro_venta, fecha y notas)
       const fechaVenta = document.getElementById('fechaVenta').value;
       const { data: venta, error: errVenta } = await sb.from('ventas').insert({
-        cliente_id: clienteVenta.id,
+        cliente_id: clienteVenta?.id || null,
         usuario_id: usuario.id,
         total_venta: totalVenta,
         vendedor: vendedor || null,
         nro_venta: nroVenta || null,
+        notas: notas || null,
         fecha_venta: fechaVenta ? new Date(fechaVenta + 'T12:00:00').toISOString() : new Date().toISOString()
       }).select().single();
 
@@ -993,9 +983,11 @@
       document.getElementById('nroVentaSugerencia').textContent = '';
       document.getElementById('errorNroVenta').style.display = 'none';
       document.getElementById('fechaVenta').value = new Date().toISOString().split('T')[0];
+      document.getElementById('notasVenta').value = '';
+      document.getElementById('buscarProductoVenta').value = '';
+      document.getElementById('resultadosProductoVenta').innerHTML = '';
       limpiarCliente();
       renderizarItems();
-      actualizarResumen();
 
       // Ir a listado y recargar
       mostrarTab('listado');
