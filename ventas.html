@@ -155,29 +155,31 @@
       <div class="card mb-24">
         <div class="buscador-contenedor" style="margin-bottom:0">
           <span class="buscador-icono">🔍</span>
-          <input type="text" class="buscador-input" id="buscarVenta" placeholder="Buscar por cliente o producto...">
+          <input type="text" class="buscador-input" id="buscarVenta" placeholder="Buscar por cliente, producto o código...">
         </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="expandirTodos()">+ Expandir todos</button>
+        <button class="btn btn-ghost btn-sm" onclick="comprimirTodos()">− Comprimir todos</button>
       </div>
       <div class="card">
         <div class="tabla-contenedor">
           <table class="tabla">
             <thead>
               <tr>
-                <th>Nro. Venta</th>
+                <th style="width:32px"></th>
+                <th>Cód.</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
-                <th>Producto</th>
-                <th>Vendedor</th>
-                <th>Forma pago</th>
-                <th>Cuotas / Vto.</th>
+                <th>Artículo / Ítems</th>
                 <th>Total</th>
-                <th>Deuda</th>
+                <th>Saldo</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody id="tablaVentas">
-              <tr><td colspan="11"><div class="cargando"><div class="spinner"></div></div></td></tr>
+              <tr><td colspan="9"><div class="cargando"><div class="spinner"></div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -315,6 +317,66 @@
       <button class="modal-cerrar" onclick="cerrarModal('modalHistorialPagos')">✕</button>
     </div>
     <div id="historialPagosContenido"></div>
+  </div>
+</div>
+
+<!-- MODAL: Editar ítem de venta -->
+<div class="modal-overlay" id="modalEditarItem">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-titulo">✏️ Editar Ítem</h2>
+      <button class="modal-cerrar" onclick="cerrarModal('modalEditarItem')">✕</button>
+    </div>
+    <div id="editItemProductoNombre" style="font-size:15px;font-weight:700;color:var(--azul-nav);margin-bottom:16px;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm)"></div>
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label class="form-label">Precio unitario ($)</label>
+        <input type="number" id="editItemPrecio" class="form-input" min="0" step="0.01">
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Cantidad</label>
+        <input type="number" id="editItemCantidad" class="form-input" min="1">
+      </div>
+    </div>
+    <div class="form-grupo">
+      <label class="form-label">Forma de pago</label>
+      <select id="editItemFormaPago" class="form-select" onchange="toggleEditItemCuotas()">
+        <option value="contado">💵 Contado / Efectivo</option>
+        <option value="semanal">📅 Cuotas semanales</option>
+        <option value="quincenal">📆 Cuotas quincenales</option>
+        <option value="mensual">🗓️ Cuotas mensuales</option>
+      </select>
+    </div>
+    <div id="editItemCuotasPanel" style="display:none">
+      <div class="form-fila">
+        <div class="form-grupo">
+          <label class="form-label">Nº de cuotas</label>
+          <input type="number" id="editItemCuotas" class="form-input" min="1" max="52">
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">Recargo (%)</label>
+          <input type="number" id="editItemRecargo" class="form-input" min="0" max="200" step="0.5" placeholder="0">
+        </div>
+      </div>
+      <div class="form-fila">
+        <div class="form-grupo">
+          <label class="form-label">Día de vencimiento</label>
+          <input type="number" id="editItemDiaVto" class="form-input" min="1" max="28" placeholder="Ej: 15">
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">% Mora</label>
+          <input type="number" id="editItemMora" class="form-input" min="0" max="100" step="0.5" placeholder="0">
+        </div>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">% Gastos administrativos</label>
+        <input type="number" id="editItemGastoAdmin" class="form-input" min="0" max="100" step="0.5" placeholder="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalEditarItem')">Cancelar</button>
+      <button class="btn btn-primario" id="btnGuardarEditItem" onclick="guardarEditarItem()">💾 Guardar</button>
+    </div>
   </div>
 </div>
 
@@ -502,32 +564,41 @@
 
   async function cargarVentas(query = '') {
     const tbody = document.getElementById('tablaVentas');
-    tbody.innerHTML = '<tr><td colspan="11"><div class="cargando"><div class="spinner"></div></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9"><div class="cargando"><div class="spinner"></div></div></td></tr>';
 
     const { data, error } = await sb
       .from('venta_items')
       .select(`
         id, forma_pago, cantidad_cuotas, valor_cuota, total_item, deuda_restante, estado,
-        proxima_fecha_pago, created_at, porcentaje_recargo, precio_base_total,
-        dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin,
+        proxima_fecha_pago, created_at, porcentaje_recargo, precio_base_total, cantidad,
+        dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin, precio_unitario,
         productos(nombre),
-        ventas(id, vendedor, nro_venta, fecha_venta, clientes(nombre))
+        ventas(id, vendedor, nro_venta, fecha_venta, clientes(nombre, codigo_cliente))
       `)
       .in('estado', ['activo', 'pagado'])
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(200);
 
-    let filtrados = data || [];
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="estado-vacio"><div class="estado-vacio-icono">⚠️</div><div class="estado-vacio-titulo">Error al cargar ventas</div></div></td></tr>`;
+      return;
+    }
+
+    let items = data || [];
+
+    // Filtrar por query
     if (query) {
-      query = query.toLowerCase();
-      filtrados = filtrados.filter(v =>
-        v.ventas?.clientes?.nombre?.toLowerCase().includes(query) ||
-        v.productos?.nombre?.toLowerCase().includes(query)
+      const q = query.toLowerCase();
+      items = items.filter(v =>
+        v.ventas?.clientes?.nombre?.toLowerCase().includes(q) ||
+        v.ventas?.clientes?.codigo_cliente?.toLowerCase().includes(q) ||
+        v.ventas?.nro_venta?.toLowerCase().includes(q) ||
+        v.productos?.nombre?.toLowerCase().includes(q)
       );
     }
 
-    if (error || filtrados.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="11">
+    if (items.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9">
         <div class="estado-vacio">
           <div class="estado-vacio-icono">💰</div>
           <div class="estado-vacio-titulo">${query ? 'Sin resultados' : 'Sin ventas registradas'}</div>
@@ -538,46 +609,159 @@
       return;
     }
 
-    const formaPagoLabel = { contado: '💵 Contado', semanal: '📅 Semanal', quincenal: '📆 Quincenal', mensual: '🗓️ Mensual' };
-    const estadoBadge = {
-      activo: '<span class="badge badge-naranja">● Activo</span>',
-      pagado: '<span class="badge badge-verde">✓ Pagado</span>',
-      cancelado: '<span class="badge badge-gris">✗ Cancelado</span>'
-    };
+    // ── Agrupar ítems por venta ───────────────────────────────────
+    const ventasMap = new Map();
+    items.forEach(item => {
+      const vid = item.ventas?.id || 'sin-venta';
+      if (!ventasMap.has(vid)) {
+        ventasMap.set(vid, {
+          ventaId: vid,
+          nroVenta: item.ventas?.nro_venta || '',
+          fecha: item.ventas?.fecha_venta || item.created_at,
+          cliente: item.ventas?.clientes?.nombre || 'Consumidor final',
+          codigoCliente: item.ventas?.clientes?.codigo_cliente || '',
+          vendedor: item.ventas?.vendedor || '',
+          items: []
+        });
+      }
+      ventasMap.get(vid).items.push(item);
+    });
 
-    tbody.innerHTML = filtrados.map(v => `
-      <tr>
-        <td>
-          ${v.ventas?.nro_venta
-            ? `<span class="badge badge-azul" style="font-size:12px;font-weight:700">${v.ventas.nro_venta}</span>`
-            : '<span class="texto-suave" style="font-size:12px">—</span>'}
-        </td>
-        <td class="texto-suave">${formatoFecha(v.ventas?.fecha_venta || v.created_at)}</td>
-        <td class="fw-600">${v.ventas?.clientes?.nombre || '-'}</td>
-        <td>${v.productos?.nombre || '-'}</td>
-        <td class="texto-suave">${v.ventas?.vendedor || '<span style="color:var(--borde)">—</span>'}</td>
-        <td>${formaPagoLabel[v.forma_pago] || v.forma_pago}</td>
-        <td class="texto-centro">
-          ${v.cantidad_cuotas || 1}
-          ${v.porcentaje_recargo > 0 ? `<br><span class="badge badge-naranja" style="font-size:11px">+${v.porcentaje_recargo}%</span>` : ''}
-          ${v.dia_vencimiento ? `<br><span class="texto-suave" style="font-size:12px">Vto. día ${v.dia_vencimiento}</span>` : ''}
-          ${v.porcentaje_mora > 0 ? `<br><span class="badge badge-rojo" style="font-size:11px">mora ${v.porcentaje_mora}%</span>` : ''}
-        </td>
-        <td class="fw-600">${formatoPeso(v.total_item)}</td>
-        <td class="${Number(v.deuda_restante) > 0 ? 'texto-rojo fw-600' : 'texto-verde'}">${formatoPeso(v.deuda_restante)}</td>
-        <td>${estadoBadge[v.estado] || v.estado}</td>
-        <td>
-          <div class="tabla-acciones">
-            ${v.estado === 'activo' && Number(v.deuda_restante) > 0
-              ? `<button class="btn btn-acento btn-sm" onclick="abrirModalPago('${v.id}')">💳 Pagar</button>`
+    const formaPagoLabel = { contado:'💵 Contado', semanal:'📅 Semanal', quincenal:'📆 Quincenal', mensual:'🗓️ Mensual' };
+
+    // ── Renderizar filas ─────────────────────────────────────────
+    let html = '';
+    ventasMap.forEach((venta, vid) => {
+      const totalVenta  = venta.items.reduce((a, i) => a + Number(i.total_item  || 0), 0);
+      const saldoVenta  = venta.items.reduce((a, i) => a + Number(i.deuda_restante || 0), 0);
+      const todosActivos = venta.items.every(i => i.estado === 'activo');
+      const todosPagados = venta.items.every(i => i.estado === 'pagado');
+      const tieneMultiple = venta.items.length > 1;
+
+      // Estado agrupado
+      let estadoBadge, estadoKey;
+      if (todosPagados)       { estadoBadge = '<span class="badge badge-verde">✓ Pagado</span>';      estadoKey = 'pagado'; }
+      else if (todosActivos)  { estadoBadge = '<span class="badge badge-naranja">● Pendiente</span>'; estadoKey = 'pendiente'; }
+      else                    { estadoBadge = '<span class="badge" style="background:#e0f2fe;color:#0369a1">◑ Parcial</span>'; estadoKey = 'parcial'; }
+
+      // Texto del artículo/ítems para la fila resumen
+      const articuloCell = tieneMultiple
+        ? `<span class="badge badge-azul" style="cursor:pointer" onclick="toggleVenta('${vid}')">🛒 ${venta.items.length} artículos</span>`
+        : `<strong>${venta.items[0].productos?.nombre || '-'}</strong>`;
+
+      // Fila resumen (siempre visible)
+      html += `
+        <tr id="fila-resumen-${vid}" style="background:white">
+          <td style="padding:10px 6px;text-align:center">
+            ${tieneMultiple
+              ? `<button onclick="toggleVenta('${vid}')" id="btn-expand-${vid}"
+                   style="width:26px;height:26px;border:1px solid var(--borde);border-radius:50%;background:white;cursor:pointer;font-size:13px;font-weight:700;line-height:1;transition:transform .2s">+</button>`
               : ''}
-            <button class="btn btn-ghost btn-sm" onclick="verHistorialPagos('${v.id}')" title="Historial de pagos">📋</button>
-            <button class="btn btn-ghost btn-sm" onclick="abrirEditarVenta('${v.ventas?.id}')" title="Editar venta">✏️</button>
-            <button class="btn btn-peligro btn-sm" onclick="confirmarEliminarVenta('${v.ventas?.id}', '${(v.ventas?.nro_venta || '').replace(/'/g,"\\'")}', '${(v.ventas?.clientes?.nombre || '').replace(/'/g,"\\'")}')">🗑️</button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
+          </td>
+          <td>
+            ${venta.nroVenta
+              ? `<span class="badge badge-azul" style="font-size:12px;font-weight:700">${venta.nroVenta}</span>`
+              : '<span class="texto-suave" style="font-size:12px">—</span>'}
+          </td>
+          <td class="texto-suave">${formatoFecha(venta.fecha)}</td>
+          <td>
+            <div class="fw-600">${venta.cliente}</div>
+            ${venta.codigoCliente ? `<div style="font-size:11px;color:var(--azul-accion)">${venta.codigoCliente}</div>` : ''}
+          </td>
+          <td>${articuloCell}</td>
+          <td class="fw-600">${formatoPeso(totalVenta)}</td>
+          <td class="${saldoVenta > 0 ? 'texto-rojo fw-600' : 'texto-verde'}">${formatoPeso(saldoVenta)}</td>
+          <td>${estadoBadge}</td>
+          <td>
+            <div class="tabla-acciones" style="flex-wrap:nowrap">
+              <button class="btn btn-ghost btn-sm" onclick="abrirEditarVenta('${vid}')" title="Editar venta">✏️</button>
+              <button class="btn btn-peligro btn-sm" onclick="confirmarEliminarVenta('${vid}','${(venta.nroVenta||'').replace(/'/g,"\\'")}','${venta.cliente.replace(/'/g,"\\'")}')">🗑️</button>
+            </div>
+          </td>
+        </tr>`;
+
+      // Filas de ítems expandibles (ocultas por defecto)
+      venta.items.forEach(item => {
+        const esContado = item.forma_pago === 'contado';
+        const cuotaInfo = !esContado
+          ? `${item.cantidad_cuotas}c × ${formatoPeso(item.valor_cuota)}${item.dia_vencimiento ? ` · vto día ${item.dia_vencimiento}` : ''}${item.porcentaje_recargo > 0 ? ` · +${item.porcentaje_recargo}%` : ''}`
+          : '';
+
+        html += `
+          <tr id="fila-item-${vid}-${item.id}" class="fila-item-${vid}"
+              style="display:none;background:#f8faff">
+            <td style="padding:8px 6px"></td>
+            <td></td>
+            <td colspan="2" style="padding:8px 10px">
+              <div style="display:flex;align-items:center;gap:8px;padding-left:16px;border-left:3px solid var(--azul-accion)">
+                <div>
+                  <div class="fw-600" style="font-size:14px">${item.productos?.nombre || '-'}</div>
+                  <div class="texto-suave" style="font-size:12px">${item.cantidad} × ${formatoPeso(item.precio_unitario || 0)}</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding:8px 10px">
+              <div style="font-size:13px">${formaPagoLabel[item.forma_pago] || item.forma_pago}</div>
+              ${cuotaInfo ? `<div class="texto-suave" style="font-size:11px">${cuotaInfo}</div>` : ''}
+              ${item.porcentaje_mora > 0 ? `<span class="badge badge-rojo" style="font-size:10px">mora ${item.porcentaje_mora}%</span>` : ''}
+            </td>
+            <td class="fw-600" style="padding:8px 10px">${formatoPeso(item.total_item)}</td>
+            <td class="${Number(item.deuda_restante) > 0 ? 'texto-rojo fw-600' : 'texto-verde'}" style="padding:8px 10px">
+              ${formatoPeso(item.deuda_restante)}
+            </td>
+            <td style="padding:8px 10px">
+              ${item.estado === 'activo'
+                ? '<span class="badge badge-naranja" style="font-size:11px">● Pendiente</span>'
+                : '<span class="badge badge-verde" style="font-size:11px">✓ Pagado</span>'}
+            </td>
+            <td style="padding:8px 10px">
+              <div class="tabla-acciones" style="flex-wrap:nowrap">
+                ${item.estado === 'activo' && Number(item.deuda_restante) > 0
+                  ? `<button class="btn btn-acento btn-sm" onclick="abrirModalPago('${item.id}')" title="Pagar">💳</button>`
+                  : ''}
+                <button class="btn btn-ghost btn-sm" onclick="verHistorialPagos('${item.id}')" title="Historial">📋</button>
+                <button class="btn btn-ghost btn-sm" onclick="abrirEditarItem('${item.id}')" title="Editar ítem">✏️</button>
+                <button class="btn btn-peligro btn-sm" onclick="eliminarItemVenta('${item.id}','${vid}')" title="Eliminar ítem">🗑️</button>
+              </div>
+            </td>
+          </tr>`;
+      });
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  // ── Toggle expandir/comprimir ────────────────────────────────
+  const ventasExpandidas = new Set();
+
+  function toggleVenta(vid) {
+    const filas = document.querySelectorAll(`.fila-item-${vid}`);
+    const btn   = document.getElementById(`btn-expand-${vid}`);
+    if (ventasExpandidas.has(vid)) {
+      filas.forEach(f => f.style.display = 'none');
+      if (btn) { btn.textContent = '+'; btn.style.transform = 'rotate(0deg)'; }
+      ventasExpandidas.delete(vid);
+    } else {
+      filas.forEach(f => f.style.display = '');
+      if (btn) { btn.textContent = '−'; btn.style.transform = 'rotate(0deg)'; }
+      ventasExpandidas.add(vid);
+    }
+  }
+
+  function expandirTodos() {
+    document.querySelectorAll('[class^="fila-item-"]').forEach(f => f.style.display = '');
+    document.querySelectorAll('[id^="btn-expand-"]').forEach(b => b.textContent = '−');
+    // Registrar todos como expandidos
+    document.querySelectorAll('[id^="fila-resumen-"]').forEach(f => {
+      const vid = f.id.replace('fila-resumen-', '');
+      ventasExpandidas.add(vid);
+    });
+  }
+
+  function comprimirTodos() {
+    document.querySelectorAll('[class^="fila-item-"]').forEach(f => f.style.display = 'none');
+    document.querySelectorAll('[id^="btn-expand-"]').forEach(b => b.textContent = '+');
+    ventasExpandidas.clear();
   }
 
   function configurarBuscadorVentas() {
@@ -1225,8 +1409,116 @@
     abrirModal('modalHistorialPagos');
   }
 
-  // ---- EDITAR VENTA ----
-  let ventaEditandoId = null;
+  // ---- EDITAR ÍTEM INDIVIDUAL ----
+  let itemEditandoId = null;
+
+  function toggleEditItemCuotas() {
+    const fp = document.getElementById('editItemFormaPago').value;
+    document.getElementById('editItemCuotasPanel').style.display = fp === 'contado' ? 'none' : 'block';
+  }
+
+  async function abrirEditarItem(itemId) {
+    const { data, error } = await sb.from('venta_items').select(`
+      id, precio_unitario, cantidad, forma_pago, cantidad_cuotas, porcentaje_recargo,
+      dia_vencimiento, porcentaje_mora, porcentaje_gasto_admin, productos(nombre)
+    `).eq('id', itemId).single();
+
+    if (error || !data) { mostrarAlerta('Error al cargar el ítem.', 'error'); return; }
+
+    itemEditandoId = itemId;
+    document.getElementById('editItemProductoNombre').textContent = '📦 ' + (data.productos?.nombre || '-');
+    document.getElementById('editItemPrecio').value    = data.precio_unitario || 0;
+    document.getElementById('editItemCantidad').value  = data.cantidad || 1;
+    document.getElementById('editItemFormaPago').value = data.forma_pago || 'contado';
+    document.getElementById('editItemCuotas').value    = data.cantidad_cuotas || 1;
+    document.getElementById('editItemRecargo').value   = data.porcentaje_recargo || 0;
+    document.getElementById('editItemDiaVto').value    = data.dia_vencimiento || '';
+    document.getElementById('editItemMora').value      = data.porcentaje_mora || 0;
+    document.getElementById('editItemGastoAdmin').value = data.porcentaje_gasto_admin || 0;
+    toggleEditItemCuotas();
+    abrirModal('modalEditarItem');
+  }
+
+  async function guardarEditarItem() {
+    if (!itemEditandoId) return;
+    const btn = document.getElementById('btnGuardarEditItem');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+
+    const precio     = parseFloat(document.getElementById('editItemPrecio').value) || 0;
+    const cantidad   = parseInt(document.getElementById('editItemCantidad').value) || 1;
+    const formaPago  = document.getElementById('editItemFormaPago').value;
+    const cuotas     = parseInt(document.getElementById('editItemCuotas').value) || 1;
+    const recargo    = parseFloat(document.getElementById('editItemRecargo').value) || 0;
+    const diaVto     = parseInt(document.getElementById('editItemDiaVto').value) || null;
+    const mora       = parseFloat(document.getElementById('editItemMora').value) || 0;
+    const gastoAdmin = parseFloat(document.getElementById('editItemGastoAdmin').value) || 0;
+
+    const totalBase   = precio * cantidad;
+    const recargoPct  = formaPago !== 'contado' ? recargo : 0;
+    const totalConRec = totalBase + totalBase * recargoPct / 100;
+    const valorCuota  = cuotas > 0 ? totalConRec / cuotas : totalConRec;
+
+    try {
+      const { error } = await sb.from('venta_items').update({
+        precio_unitario:        precio,
+        cantidad:               cantidad,
+        forma_pago:             formaPago,
+        cantidad_cuotas:        formaPago !== 'contado' ? cuotas : 1,
+        porcentaje_recargo:     recargoPct,
+        valor_cuota:            valorCuota,
+        total_item:             totalConRec,
+        precio_base_total:      totalBase,
+        deuda_restante:         formaPago === 'contado' ? 0 : totalConRec,
+        estado:                 formaPago === 'contado' ? 'pagado' : 'activo',
+        dia_vencimiento:        formaPago !== 'contado' ? diaVto : null,
+        porcentaje_mora:        formaPago !== 'contado' ? mora : 0,
+        porcentaje_gasto_admin: formaPago !== 'contado' ? gastoAdmin : 0,
+      }).eq('id', itemEditandoId);
+
+      if (error) throw error;
+      mostrarAlerta('Ítem actualizado correctamente.', 'exito');
+      cerrarModal('modalEditarItem');
+      await cargarVentas(document.getElementById('buscarVenta').value.trim());
+    } catch (err) {
+      mostrarAlerta('Error al guardar: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = '💾 Guardar';
+    }
+  }
+
+  // ---- ELIMINAR ÍTEM INDIVIDUAL ----
+  async function eliminarItemVenta(itemId, ventaId) {
+    if (!confirm('¿Eliminar este ítem de la venta? El stock se devolverá automáticamente.')) return;
+    try {
+      // Obtener datos del ítem para devolver stock
+      const { data: item } = await sb.from('venta_items')
+        .select('producto_id, cantidad')
+        .eq('id', itemId).single();
+
+      // Eliminar pagos del ítem
+      await sb.from('pagos').delete().eq('venta_item_id', itemId);
+      // Devolver stock
+      if (item) {
+        const { data: prod } = await sb.from('productos').select('stock').eq('id', item.producto_id).single();
+        await sb.from('productos').update({ stock: (prod?.stock || 0) + item.cantidad }).eq('id', item.producto_id);
+        await sb.from('stock_movimientos').insert({ producto_id: item.producto_id, tipo: 'entrada', cantidad: item.cantidad, motivo: 'Eliminación de ítem de venta' });
+      }
+      // Eliminar el ítem
+      await sb.from('venta_items').delete().eq('id', itemId);
+
+      // Si la venta quedó sin ítems, eliminarla también
+      const { data: restantes } = await sb.from('venta_items').select('id').eq('venta_id', ventaId);
+      if (!restantes || restantes.length === 0) {
+        await sb.from('ventas').delete().eq('id', ventaId);
+      }
+
+      mostrarAlerta('Ítem eliminado. Stock devuelto.', 'exito');
+      await cargarVentas(document.getElementById('buscarVenta').value.trim());
+      await cargarProductosCatalogo();
+    } catch (err) {
+      mostrarAlerta('Error al eliminar el ítem: ' + err.message, 'error');
+    }
+  }
 
   async function abrirEditarVenta(ventaId) {
     if (!ventaId || ventaId === 'undefined') { mostrarAlerta('No se pudo identificar la venta.', 'error'); return; }
