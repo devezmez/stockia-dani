@@ -674,6 +674,19 @@
           <td>${estadoBadge}</td>
           <td>
             <div class="tabla-acciones" style="flex-wrap:nowrap">
+              ${(() => {
+                // Si hay un solo ítem con deuda → botón pagar directo
+                if (!tieneMultiple) {
+                  const item = venta.items[0];
+                  return item.estado === 'activo' && Number(item.deuda_restante) > 0
+                    ? `<button class="btn btn-acento btn-sm" onclick="abrirModalPago('${item.id}')" title="Registrar pago">💳 Pagar</button>`
+                    : '';
+                }
+                // Varios ítems con deuda → invitar a expandir
+                return saldoVenta > 0
+                  ? `<button class="btn btn-acento btn-sm" onclick="toggleVenta('${vid}')" title="Expandir para pagar">💳 Pagar</button>`
+                  : '';
+              })()}
               <button class="btn btn-ghost btn-sm" onclick="abrirEditarVenta('${vid}')" title="Editar venta">✏️</button>
               <button class="btn btn-peligro btn-sm" onclick="confirmarEliminarVenta('${vid}','${(venta.nroVenta||'').replace(/'/g,"\\'")}','${venta.cliente.replace(/'/g,"\\'")}')">🗑️</button>
             </div>
