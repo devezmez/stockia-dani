@@ -1,119 +1,175 @@
-# 🏥 VasaSalud - Guía de Instalación y Deploy
+# 📦 Stockia — Tu inventario, bajo control.
 
-## Estructura del proyecto
+Sistema SaaS de gestión de inventario, clientes y ventas con cuotas.
+
+## 🗂️ Estructura del proyecto
 
 ```
-vasasalud/
-├── index.html          # App principal
+stockia/
+├── login.html          — Pantalla de inicio de sesión
+├── dashboard.html      — Panel principal con estadísticas
+├── productos.html      — Gestión de productos y stock
+├── clientes.html       — Gestión de clientes
+├── ventas.html         — Registro de ventas y pagos
+├── admin.html          — Panel de administración (solo admin)
 ├── css/
-│   └── main.css        # Estilos (mobile-first)
+│   └── global.css      — Estilos compartidos
 ├── js/
-│   ├── config.js       # Configuración Supabase
-│   ├── supabase.js     # Cliente y helpers de DB
-│   ├── auth.js         # Login, registro, recuperación
-│   ├── user.js         # Dashboard de usuarios
-│   ├── admin.js        # Dashboard de admins
-│   ├── superadmin.js   # Panel super admin
-│   └── app.js          # Controller principal
-├── supabase-schema.sql # SQL para ejecutar en Supabase
-├── _headers            # Headers de seguridad (Cloudflare)
-└── _redirects          # Redirects SPA (Cloudflare)
+│   └── global.js       — Utilidades y config de Supabase
+├── img/
+│   └── logo.svg        — Logo vectorial
+└── supabase/
+    ├── schema.sql       — Script completo de base de datos
+    └── functions/
+        └── resumen-semanal/
+            └── index.ts — Edge Function (email semanal)
 ```
 
 ---
 
-## PASO 1: Configurar Supabase
+## 🚀 Guía de instalación
 
-### 1.1 - Ejecutar el schema SQL
-1. Ir a **Supabase Dashboard → SQL Editor**
-2. Pegar y ejecutar el contenido de `supabase-schema.sql`
-3. Verificar que se crearon las tablas: `profiles`, `requests`, `family_members`
+### 1. Crear proyecto en Supabase
 
-### 1.2 - Crear bucket de Storage
-1. Ir a **Storage → Create Bucket**
-2. Nombre: `vasasalud`
-3. Marcar como **Public**
-4. En SQL Editor ejecutar:
+1. Ir a [supabase.com](https://supabase.com) → Nuevo proyecto
+2. Anotar:
+   - **Project URL**: `https://XXXXX.supabase.co`
+   - **Anon Key**: en Settings > API
+
+### 2. Ejecutar el schema SQL
+
+1. Ir a **SQL Editor** en Supabase
+2. Pegar el contenido de `supabase/schema.sql`
+3. Ejecutar ▶️
+
+### 3. Configurar credenciales
+
+Editar `js/global.js` y reemplazar:
+
+```javascript
+const SUPABASE_URL = 'https://TU_PROYECTO.supabase.co';
+const SUPABASE_ANON_KEY = 'TU_ANON_KEY';
+```
+
+También hacer lo mismo en `login.html` (tiene su propio snippet de Supabase).
+
+### 4. Crear el primer usuario Admin
+
+Opción A — Desde Supabase Dashboard:
+1. Ir a **Authentication > Users > Invite user**
+2. Creá el usuario con email y contraseña
+3. Luego en **SQL Editor** ejecutar:
 ```sql
-CREATE POLICY "Authenticated users can upload"
-  ON storage.objects FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated' AND bucket_id = 'vasasalud');
-
-CREATE POLICY "Public read access"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'vasasalud');
+UPDATE public.profiles 
+SET rol = 'admin', nombre = 'Tu Nombre'
+WHERE email = 'tu@email.com';
 ```
 
-### 1.3 - Configurar autenticación de email
-1. Ir a **Authentication → Settings**
-2. En "Email" habilitar **Confirm email** si lo deseás
-3. Configurar el **Site URL** con tu dominio de Cloudflare
-
-### 1.4 - Crear Super Admin
-1. Registrarte normalmente en la app con el mail `superadmin@vasasalud.com`
-2. En SQL Editor ejecutar:
+Opción B — Desde SQL:
 ```sql
-UPDATE public.profiles SET role = 'super_admin' WHERE email = 'superadmin@vasasalud.com';
+-- Esto requiere que el usuario ya exista en auth.users
+UPDATE public.profiles SET rol = 'admin' WHERE email = 'admin@tunegocio.com';
 ```
-3. También podés cambiar el email del super admin en `js/config.js`
+
+### 5. Subir a GitHub + Cloudflare Pages
+
+```bash
+git init
+git add .
+git commit -m "Stockia v1.0 inicial"
+git remote add origin https://github.com/TU_USUARIO/stockia.git
+git push -u origin main
+```
+
+En **Cloudflare Pages**:
+1. Nuevo proyecto → Conectar con GitHub
+2. Seleccionar repo `stockia`
+3. Build settings: sin build command, output dir: `/` (raíz)
+4. Deploy 🚀
 
 ---
 
-## PASO 2: Deploy en Cloudflare Pages
+## 📧 Configurar envío de emails semanales
 
-### Opción A - Subir archivos directamente
-1. Ir a **Cloudflare Dashboard → Pages → Create Project**
-2. Elegir **"Upload assets"**
-3. Subir todos los archivos del proyecto
-4. Configurar el dominio custom si tenés uno
+### Instalar Supabase CLI
 
-### Opción B - Via GitHub (recomendado)
-1. Subir el proyecto a un repositorio GitHub
-2. En Cloudflare Pages → **Connect to Git**
-3. Seleccionar el repositorio
-4. Configuración de build:
-   - **Build command**: (vacío, es HTML estático)
-   - **Build output directory**: `/` (raíz del proyecto)
-5. Deploy
+```bash
+npm install -g supabase
+supabase login
+supabase link --project-ref TU_PROJECT_REF
+```
+
+### Registrarse en Resend
+
+1. Ir a [resend.com](https://resend.com) (plan gratuito: 3.000 emails/mes)
+2. Crear API Key
+3. Verificar tu dominio (o usar el dominio de prueba)
+
+### Deploy de la Edge Function
+
+```bash
+supabase functions deploy resumen-semanal
+```
+
+### Configurar variables de entorno
+
+En Supabase Dashboard > Settings > Edge Functions > Secrets:
+
+```
+RESEND_API_KEY=re_xxxxxxxxxxxx
+EMAIL_DOMAIN=tunegocio.com
+```
+
+### Programar el cron
+
+En Supabase Dashboard > Database > Extensions, habilitar `pg_cron`.
+
+Luego en SQL Editor:
+
+```sql
+-- Ejecutar todos los lunes a las 8 AM (UTC-3 = 11 AM UTC)
+SELECT cron.schedule(
+  'resumen-semanal',
+  '0 11 * * 1',
+  $$
+  SELECT net.http_post(
+    url := 'https://TU_PROYECTO.supabase.co/functions/v1/resumen-semanal',
+    headers := '{"Authorization": "Bearer TU_ANON_KEY"}'::jsonb
+  );
+  $$
+);
+```
 
 ---
 
-## Roles del sistema
+## 🔐 Seguridad implementada
 
-| Rol | Descripción | Acceso |
-|-----|-------------|--------|
-| `user` | Trabajador | Dashboard propio, solicitudes, familia |
-| `admin` | Médica/Enfermera | Ver todas las solicitudes, pacientes, crear admins |
-| `super_admin` | Administrador global | Control total del sistema |
+- ✅ RLS (Row Level Security) en todas las tablas
+- ✅ RBAC: Admin vs Operador con políticas distintas
+- ✅ Validación de sesión en cada página
+- ✅ Verificación de usuario activo/inactivo
+- ✅ Usuarios inactivos son bloqueados al login
+- ✅ Solo admins pueden eliminar datos y acceder al panel admin
 
----
+## 💡 Tecnologías
 
-## Seguridad implementada
-
-✅ **Row Level Security (RLS)** en Supabase - los usuarios solo ven sus propios datos  
-✅ **Anon key** (diseñada para ser pública, sin permisos elevados)  
-✅ **Service role key** - NUNCA expuesta en el frontend  
-✅ **Content Security Policy** via `_headers`  
-✅ **X-Frame-Options: DENY** - evita clickjacking  
-✅ **Políticas de roles** - verificación server-side en cada query  
-✅ **No datos sensibles en localStorage** - sesión manejada por Supabase  
-
----
-
-## Notas importantes
-
-- El **anon key** de Supabase es seguro en el frontend (está diseñado para esto)
-- Las **políticas RLS** en Supabase garantizan que usuarios no puedan acceder a datos ajenos
-- Para producción, revisar y ajustar las políticas RLS según necesidades
-- Las **transcripciones** se suben al bucket `vasasalud` de Supabase Storage
-- Si querés deshabilitar el registro público, ir a **Authentication → Settings → Disable sign ups**
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | HTML + CSS + JavaScript puro |
+| Backend / DB | Supabase (PostgreSQL) |
+| Auth | Supabase Auth |
+| Hosting | Cloudflare Pages |
+| Emails | Supabase Edge Functions + Resend |
+| Fuente | Inter (Google Fonts) |
 
 ---
 
-## Soporte
+## 📱 Responsive
 
-Si algo no funciona, verificar:
-1. Que el schema SQL se ejecutó correctamente en Supabase
-2. Que la URL y anon key en `js/config.js` son correctas
-3. Que el bucket `vasasalud` existe en Storage
-4. Los logs en Supabase Dashboard → Logs
+El sistema está optimizado para:
+- 📱 Móvil (360px+)
+- 📟 Tablet (768px+)
+- 💻 Desktop (1024px+)
+- 🖥️ Pantallas grandes (1400px+)
+
+Diseño pensado para usuarios mayores: texto grande, botones amplios, navegación clara.
